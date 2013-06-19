@@ -1,5 +1,5 @@
 var requestTimeout = 1000 * 30;  // 5 seconds
-var serviceUri = "http://localhost";
+var serviceUri = "http://localhost"; //Update to point to location where node service is hosted.
 
 window.onload=function(){
 	getUsage();
