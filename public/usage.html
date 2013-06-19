@@ -1,0 +1,46 @@
+<!DOCTYPE html>
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="apple-mobile-web-app-capable" content="yes" />
+<html>
+  <head>
+	<link rel="apple-touch-icon-precomposed" href="touch-icon-iphone.png" />
+	<!--
+	<link rel="apple-touch-icon" sizes="72x72" href="touch-icon-ipad.png" />
+	<link rel="apple-touch-icon" sizes="114x114" href="touch-icon-iphone-retina.png" />
+	<link rel="apple-touch-icon" sizes="144x144" href="touch-icon-ipad-retina.png" />
+	-->
+    <title>Popup</title>
+	<link href="http://netdna.bootstrapcdn.com/twitter-bootstrap/2.3.2/css/bootstrap-combined.min.css" rel="stylesheet">
+    <link href="resources/popup.css" rel="stylesheet">
+    <script src="resources/popup.js"></script>
+	<script src="http://ajax.googleapis.com/ajax/libs/jquery/1.9.1/jquery.min.js"></script>
+  </head>
+  <body>
+	<img id="refresh" src="resources/refresh.png" style="position: absolute;right: 10px;cursor: pointer; display:none" />
+	<div id="container"><img src="resources/loader.gif"></img></div>
+	<div class="container">	
+		<table id="table">
+			<thead>
+				<tr><th>Device</th><th>Usage</th><th>Today</th></tr>
+			</thead>
+			<tbody>
+			</tbody>
+		</table>
+	</div>
+	<div class="container">
+		<section id="usage">
+		</section>
+	</div>
+	<hr style="margin: 6px 10px 15px 10px;">
+	<div class="container">
+		<div class="bs-docs-example">
+			<span class="help-inline" style="width: 110px;font-size: 13px;font-family: "Helvetica Neue",Helvetica,Arial,sans-serif;">Transmission:</span>              
+			<div class="btn-group" data-toggle="buttons-radio">
+				<button type="button" name='includeicon' class="btn btn-mini" style="width:80px" value="1">stop</button>
+				<button type="button" name='includeicon' class="btn btn-mini"  style="width:80px" value="0">start</button>
+			</div>
+		</div>
+	</div>
+	<script src="http://netdna.bootstrapcdn.com/twitter-bootstrap/2.3.2/js/bootstrap.min.js"></script>
+  </body>
+</html>

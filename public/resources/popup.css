@@ -1,0 +1,206 @@
+/**
+ * Copyright (c) 2012 The Chromium Authors. All rights reserved.
+ * Use of this source code is governed by a BSD-style license that can be
+ * found in the LICENSE file.
+ */
+
+body {
+	margin: 10px 0px 10px;
+}
+
+h1 {
+  color: #53637D;
+  font: 26px/1.2 Helvetica, sans-serif;
+  font-size: 200%;
+  margin: 0;
+  padding-bottom: 4px;
+  text-shadow: white 0 1px 2px;
+}
+
+label {
+  color: #222;
+  font: 18px/1.4 Helvetica, sans-serif;
+  margin: 0.5em 0;
+  display: inline-block;
+}
+
+form {
+  /*width: 563px;*/
+  -webkit-transition: -webkit-transform 0.25s ease;
+}
+
+button {
+  display: block;
+  border-radius: 2px;
+  box-shadow: 0px 1px 3px rgba(0, 0, 0, 0.1);
+  -webkit-user-select: none;
+  background: -webkit-linear-gradient(#FAFAFA, #F4F4F4 40%, #E5E5E5);
+  border: 1px solid #AAA;
+  color: #444;
+  margin-bottom: 0;
+  min-width: 4em;
+  padding: 3px 12px;
+  margin-top: 0;
+  font-size: 1.1em;
+}
+
+.overlay {
+  display: block;
+  text-align: center;
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  width: 500px;
+  padding: 20px;
+  margin: -40px 0 0 -270px;
+  opacity: 0;
+  background: rgba(0, 0, 0, 0.75);
+  border-radius: 5px;
+  color: #FFF;
+  font: 1.5em/1.2 Helvetica Neue, sans-serif;
+  -webkit-transition: all 1.0s ease;
+  -webkit-transform: scale(0);
+}
+
+.overlay a {
+  color:  #FFF;
+}
+
+.overlay.visible {
+  opacity: 1;
+  -webkit-transform: scale(1);
+}
+
+/*-----*/
+
+.container {
+	width:100%;
+	padding: 0 10px;
+	box-sizing: border-box
+}
+
+td {
+    border-bottom: 1px dashed #CCC;
+}
+#table tr:last-of-type  td{
+    border-bottom: none;
+	font-weight: bold;
+}
+
+body{
+	font-family: tahoma, sans-serif;
+	font-size: 11px;
+	
+}
+#table {
+	display:none;
+    border-collapse: collapse;
+	/*width: 100%;*/
+	/*width:280px;*/
+}
+
+#table td:first-of-type{
+	width: 120px;
+}
+
+#table td:nth-of-type(2){
+	width: 80px;
+}
+
+#table th{
+	text-align:left;;
+}
+
+/*#table td span {*/
+#table td .hover {
+	position: relative;
+	left: 1px;
+	/*left: 4px;
+	top: -1px;
+	color: #EEE;*/
+	color: #AAA;
+	cursor: pointer;
+}
+
+/*
+#table tr:first-of-type{
+	font-weight: bold;
+}
+*/
+
+tr {
+    height: 20px;
+}
+
+.arrow{
+  /*font-size: 14px;*/
+  cursor: pointer;
+  height: 0;
+  width: 0;
+  border: 4px solid transparent;
+  display:inline-block;
+}
+
+.arrow.disabled {
+  cursor: default;
+  /*color: #ccc;*/
+}
+
+.arrow.left{
+  /*padding-right: 2px;*/
+  border-right-color: #000;
+  margin:0 2px 0 -4px;
+}
+.arrow.left.disabled{
+  border-right-color: #ccc;
+}
+
+.arrow.right{
+  /*padding-left: 2px;*/
+  border-left-color: #000;
+  margin:0 -4px 0 2px;
+}
+
+.arrow.right.disabled{
+  border-left-color: #ccc;
+}
+
+/** drive usage **/
+.progress .bar {
+	border-radius: 4px;
+}
+
+.progress {
+	height: 8px;
+	margin-bottom: 9px;
+}
+
+body{
+	width:100%;
+	padding:0px;
+}
+
+#usage {
+	line-height: 12px;
+}
+
+/** iPhone specific css **/
+#table td .details {
+	display:none;
+}
+
+@media screen and (orientation:landscape) {
+	#table td:first-of-type{
+		width: 200px;
+	}
+
+	#table td .hover {
+		display:none;
+	}
+
+	#table td .details {
+		display:inline;
+		color: #AAA;
+		padding-left: 5px;
+	}
+}
