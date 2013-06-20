@@ -33,6 +33,14 @@ function setServiceStatus(service, status) {
 	else
 		data = {"service": service, "status": status};
 
+
+	//$.post(url, dataToBeSent, function(data, textStatus) {
+	  //data contains the JSON object
+	  //textStatus contains the status: success, error, etc
+	//}, "json");
+
+	//$.ajax(type: "PUT", dataType: "json", url: serviceUri+'/serviceStatus', data: data).done(function(data){
+	//$.ajax(dataType: "json", url: serviceUri+'/serviceStatus', data: data).done(function(data){
 	$.getJSON(serviceUri+'/serviceStatus', data).done(function(data){
 		$("[name='includeicon']:eq(0)").removeClass('btn-danger').text('stop').removeClass('disabled');
 		$("[name='includeicon']:eq(1)").removeClass('btn-success').text('start').removeClass('disabled');
