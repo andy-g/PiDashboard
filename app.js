@@ -12,7 +12,7 @@ app.use(express.static(__dirname + '/public'));
 
 //-----settings-----
 //on load - sync file read
-var settings = JSON.parse(fs.readFileSync('scraping.config.json'));
+var settings = JSON.parse(fs.readFileSync('app.config.json'));
 console.log('settings loaded.');
 
 //------------------	
