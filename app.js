@@ -18,5 +18,5 @@ app.get('/drives', usage.drives);
 app.get('/services/:service?/:status?', usage.serviceStatus);
 
 //-----start server-----
-app.listen(3000);
+app.listen(8080);
 console.log('Listening on 8080');
