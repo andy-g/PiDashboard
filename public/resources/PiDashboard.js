@@ -41,7 +41,7 @@ function setServiceStatus(service, status) {
 
 	//$.ajax(type: "PUT", dataType: "json", url: serviceUri+'/serviceStatus', data: data).done(function(data){
 	//$.ajax(dataType: "json", url: serviceUri+'/serviceStatus', data: data).done(function(data){
-	$.getJSON(serviceUri+'/serviceStatus', data).done(function(data){
+	$.getJSON(serviceUri+'/services', data).done(function(data){
 		$("[name='includeicon']:eq(0)").removeClass('btn-danger').text('stop').removeClass('disabled');
 		$("[name='includeicon']:eq(1)").removeClass('btn-success').text('start').removeClass('disabled');
 
@@ -119,7 +119,7 @@ function getUsage() {
 			handleError("XMLHttpRequest error.");
 		};
 
-		xhr.open("GET", serviceUri+'/request', true); //'http://localhost:8080/request'
+		xhr.open("GET", serviceUri+'/today', true); //'http://localhost:8080/request'
 		xhr.send(null);
 	} catch(e) {
 		handleError();
