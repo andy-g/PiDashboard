@@ -1,5 +1,4 @@
 var requestTimeout = 1000 * 30;  // 5 seconds
-var serviceUri = "http://localhost"; //Update to point to location where node service is hosted.
 
 window.onload=function(){
 	getUsage();
@@ -33,15 +32,7 @@ function setServiceStatus(service, status) {
 	else
 		data = {"service": service, "status": status};
 
-
-	//$.post(url, dataToBeSent, function(data, textStatus) {
-	  //data contains the JSON object
-	  //textStatus contains the status: success, error, etc
-	//}, "json");
-
-	//$.ajax(type: "PUT", dataType: "json", url: serviceUri+'/serviceStatus', data: data).done(function(data){
-	//$.ajax(dataType: "json", url: serviceUri+'/serviceStatus', data: data).done(function(data){
-	$.getJSON(serviceUri+'/services', data).done(function(data){
+	$.ajax(type: "PUT", dataType: "json", url: window.location.protocol + "//" + window.location.host +'/services', data: data).done(function(data){
 		$("[name='includeicon']:eq(0)").removeClass('btn-danger').text('stop').removeClass('disabled');
 		$("[name='includeicon']:eq(1)").removeClass('btn-success').text('start').removeClass('disabled');
 
@@ -119,7 +110,7 @@ function getUsage() {
 			handleError("XMLHttpRequest error.");
 		};
 
-		xhr.open("GET", serviceUri+'/today', true); //'http://localhost:8080/request'
+		xhr.open("GET", window.location.protocol + "//" + window.location.host +'/today', true); //'http://localhost:8080/request'
 		xhr.send(null);
 	} catch(e) {
 		handleError();
@@ -177,7 +168,7 @@ function getDriveUsage() {
 			handleError("XMLHttpRequest error.");
 		};
 
-		xhr.open("GET", serviceUri+'/drives', true);
+		xhr.open("GET", window.location.protocol + "//" + window.location.host +'/drives', true);
 		xhr.send(null);
 	} catch(e) {
 		handleError();

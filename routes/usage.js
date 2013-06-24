@@ -42,7 +42,7 @@ exports.todaysUsage = function(req, res) {
 				var today_device_usage = "-";
 				if (today_usage){
 					var filtered_device = today_usage.stats.filter(function (element, index, array) {  return (element.ip_add === value.ip_add); });
-					if (filtered_device.length > 0 && filtered_device[0].total_bytes < value.total_bytes)
+					if (filtered_device.length > 0 && parseInt(filtered_device[0].total_bytes) < parseInt(value.total_bytes))
 						today_device_usage = value.total_bytes - filtered_device[0].total_bytes;
 					else
      					today_device_usage = value.total_bytes;
@@ -72,15 +72,19 @@ exports.drives = function(req, res) {
 
 };
 
-exports.serviceStatus = function(req, res) {
-    var id = req.params.id;
-};
+// exports.serviceStatus = function(req, res) {
+//     var id = req.params.id;
+// };
 
 exports.serviceStatus = function(req, res) {
-    //if (req.route.method != 'put')
 	res.header("Access-Control-Allow-Origin", "*");
 	var status = !req.param('status') || !(/start|stop/g).test(req.param('status')) ? "status" : req.param('status');
 	
+	if (status != "status" && req.route.method != "put"){
+		res.json(500, {"err" : "Service status could not be set using a get request, please rather use a put request"});
+		return;
+	}
+
 	exec("sudo /etc/init.d/transmission-daemon " + status, function(error, stdout, stderr){
 		if (status != "status" && error !== null) {
 			console.log('exec error: ' + error + ' stdout: ' + stdout + ' stderr: ' + stderr);

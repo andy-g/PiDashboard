@@ -16,6 +16,7 @@ app.get('/save', usage.saveUsage);
 app.get('/today', usage.todaysUsage);
 app.get('/drives', usage.drives);
 app.get('/services/:service?/:status?', usage.serviceStatus);
+app.put('/services/:service?/:status?', usage.serviceStatus);
 
 //-----start server-----
 app.listen(8080);
