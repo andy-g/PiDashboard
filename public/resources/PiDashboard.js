@@ -32,7 +32,7 @@ function setServiceStatus(service, status) {
 	else
 		data = {"service": service, "status": status};
 
-	$.ajax(type: "PUT", dataType: "json", url: window.location.protocol + "//" + window.location.host +'/services', data: data).done(function(data){
+	$.ajax({type: "PUT", dataType: "json", url: window.location.protocol + "//" + window.location.host +'/services', data: data}).done(function(data){
 		$("[name='includeicon']:eq(0)").removeClass('btn-danger').text('stop').removeClass('disabled');
 		$("[name='includeicon']:eq(1)").removeClass('btn-success').text('start').removeClass('disabled');
 
