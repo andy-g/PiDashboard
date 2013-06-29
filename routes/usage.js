@@ -42,7 +42,7 @@ exports.todaysUsage = function(req, res) {
 				var today_device_usage = "-";
 				if (today_usage){
 					var filtered_device = today_usage.stats.filter(function (element, index, array) {  return (element.ip_add === value.ip_add); });
-					if (filtered_device.length > 0 && parseInt(filtered_device[0].total_bytes) < parseInt(value.total_bytes))
+					if (filtered_device.length > 0 && parseInt(filtered_device[0].total_bytes) <= parseInt(value.total_bytes))
 						today_device_usage = value.total_bytes - filtered_device[0].total_bytes;
 					else
      					today_device_usage = value.total_bytes;
