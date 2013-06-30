@@ -157,6 +157,8 @@ function SaveUsageHistory(currentUsage, callback){
 					_settings.usageHistoryPath, 
 					_settings.usageHistoryPath.replace(".json","_" + _date.getFullYear() + formatHelper.padNumber(_date.getMonth() + 1, 2) + ".json")
 				);
+				//Reset data for the new month
+				data = new Array();
 			}
 
 			fs.writeFile(_settings.usageHistoryPath, JSON.stringify(data.concat(currentUsage), null, "\t"), function(err) {
