@@ -150,7 +150,7 @@ function SaveUsageHistory(currentUsage, callback){
 	GetUsageHistory(function (err, data) {
 		if (data){
 			//If it's the first day of the month, backup the current file with a _YYYYMM suffix, eg: usage_history_201306.json
-			var _date = currentUsage.date;//new Date();
+			var _date = new Date(currentUsage.date);
 			if (_date.getDate() == 1){
 				_date.setDate(_date.getDate()-1); //Move date back 1 day to determine previous month details
 				fs.renameSync(
