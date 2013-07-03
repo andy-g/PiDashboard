@@ -1,7 +1,13 @@
 var	express = require('express'),
 	fs = require('fs'),
-	usage = require('./routes/usage');
+	usage = require('./routes/usage'),
+	https = require('https');
 	//_settings = require('../app.config.json');
+
+var options = {
+  key: fs.readFileSync('keys/server-key.pem'),
+  cert: fs.readFileSync('keys/server-cert.pem')
+};
 
 var app = express();
 app.use(express.cookieParser());
@@ -18,6 +24,7 @@ app.get('/drives', usage.drives);
 app.get('/services/:service?/:status?', usage.serviceStatus);
 app.put('/services/:service?/:status?', usage.serviceStatus);
 
-//-----start server-----
-app.listen(8080);
+//-----start server (comment out https and use app.listen line if you don't have https keys in the keys folder)-----
+//app.listen(8080);
+https.createServer(options, app).listen(8080);//(443);
 console.log('Listening on 8080');
