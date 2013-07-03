@@ -42,7 +42,7 @@ exports.todaysUsage = function(req, res) {
 				var today_device_usage = "-";
 				if (today_usage){
 					var filtered_device = today_usage.stats.filter(function (element, index, array) {  return (element.ip_add === value.ip_add); });
-					if (filtered_device.length > 0 && parseInt(filtered_device[0].total_bytes) < parseInt(value.total_bytes))
+					if (filtered_device.length > 0 && parseInt(filtered_device[0].total_bytes) <= parseInt(value.total_bytes))
 						today_device_usage = value.total_bytes - filtered_device[0].total_bytes;
 					else
      					today_device_usage = value.total_bytes;
@@ -150,13 +150,15 @@ function SaveUsageHistory(currentUsage, callback){
 	GetUsageHistory(function (err, data) {
 		if (data){
 			//If it's the first day of the month, backup the current file with a _YYYYMM suffix, eg: usage_history_201306.json
-			var _date = currentUsage.date;//new Date();
+			var _date = new Date(currentUsage.date);
 			if (_date.getDate() == 1){
 				_date.setDate(_date.getDate()-1); //Move date back 1 day to determine previous month details
 				fs.renameSync(
 					_settings.usageHistoryPath, 
 					_settings.usageHistoryPath.replace(".json","_" + _date.getFullYear() + formatHelper.padNumber(_date.getMonth() + 1, 2) + ".json")
 				);
+				//Reset data for the new month
+				data = new Array();
 			}
 
 			fs.writeFile(_settings.usageHistoryPath, JSON.stringify(data.concat(currentUsage), null, "\t"), function(err) {
