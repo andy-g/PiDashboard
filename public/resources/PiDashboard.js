@@ -110,7 +110,7 @@ function getUsage() {
 			handleError("XMLHttpRequest error.");
 		};
 
-		xhr.open("GET", window.location.protocol + "//" + window.location.host +'/today', true); //'http://localhost:8080/request'
+		xhr.open("GET", window.location.protocol + "//" + window.location.host +'/summary', true); //'http://localhost:8080/request'
 		xhr.send(null);
 	} catch(e) {
 		handleError();

@@ -4,5 +4,14 @@
 	"namedDevices": {
 		"192.168.1.100": "Device1",
 		"192.168.1.101": "Device2"
-	}
+	},
+	"timePeriods":[
+		{ "name": "Night Surfer", "endHour": 5 },
+		{ "name": "Peak", "endHour": 23 },
+		{ "name": "Night Surfer", "endHour": 24 }
+	],
+	"dataAllocations":[
+		{ "name": "Night Surfer", "description": "Data available between 23:00 and 5:00", "bytes": 10737418240 },
+		{ "name": "Peak", "description": "Data available between 5:00 and 23:00", "bytes": 10737418240 }
+	]
 }

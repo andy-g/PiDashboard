@@ -58,6 +58,83 @@ exports.todaysUsage = function(req, res) {
 	});
 };
 
+//try cache data, and load it on startup or when rewriting to the file
+exports.usageSummary = function(req, res) {
+	var runDate = !req.param('runDate') ? new Date() : new Date(parseInt(req.param('runDate')));
+
+	res.header("Access-Control-Allow-Origin", "*");
+	GetCurrentUsage(function (err, current_usage) {
+		GetUsageHistory(function (err, data) {
+			data = data.concat(current_usage);
+
+			if(err || !data){ 
+				console.log( { msg: "GetTodaysUsage: No data found for today.", "error": err } );
+			} else {
+				//sort by date
+				data.sort(function(a,b){ return a.date - b.date; });
+				data.totals = {};
+
+				//process each period
+				var total = data.reduce(function(previousValue, currentValue, index, array){
+			  		var jobPeriod = _settings.timePeriods.filter(function (element, index, array) {  return (element.endHour > (new Date(currentValue.date)).getHours()); })[0];
+					var periodDate = new Date(currentValue.date);
+
+					//process each ip address for period
+			  		var total = currentValue.stats.reduce(function(previousValue, currentValue, index, array){
+			  			if (!data.totals[currentValue.ip_add])
+			  				data.totals[currentValue.ip_add] = { usageToDate: { total: 0 }, usageToday: { total: 0 }, lastTotal: 0 };
+			  				//data.totals[currentValue.ip_add] = { usageToDate: {}, usageToday: {}, lastTotal: 0 };
+
+			  			data.totals[currentValue.ip_add].mac_add = currentValue.mac_add;
+			  			data.totals[currentValue.ip_add].device_name = currentValue.device_name;
+
+						//If we're starting a new month, period usage should be forced to 0
+						var periodUsage = 0;
+			  			if (periodDate.getDate() != 1 || periodDate.getHours() != 0){
+							periodUsage = parseInt(currentValue.total_bytes) - (data.totals[currentValue.ip_add].lastTotal || 0);
+							if (periodUsage < 0) { //if periodUsage is < 0, router must have been reset in the period, so just use the Total usage as a period usage
+								periodUsage = parseInt(currentValue.total_bytes);
+							}
+			  			}
+
+			  			data.totals[currentValue.ip_add].usageToDate[jobPeriod.name] = (data.totals[currentValue.ip_add].usageToDate[jobPeriod.name] || 0) + periodUsage;
+			  			data.totals[currentValue.ip_add].usageToDate.total = data.totals[currentValue.ip_add].usageToDate.total + periodUsage;
+			  			data.totals[currentValue.ip_add].lastTotal = parseInt(currentValue.total_bytes);
+
+						//Get Today's (runDate) usage (only include if period date is after 00:01 - allow 1 minute delay in midnight run running)
+						if (periodDate > new Date(runDate).setHours(0,1,0,0) && periodDate <= new Date(new Date(runDate).setDate(runDate.getDate()+1)).setHours(0,1,0,0)){
+			  				data.totals[currentValue.ip_add].usageToday[jobPeriod.name] = (data.totals[currentValue.ip_add].usageToday[jobPeriod.name] || 0) + periodUsage;
+			  				data.totals[currentValue.ip_add].usageToday.total = data.totals[currentValue.ip_add].usageToday.total + periodUsage;
+			  			}
+			  			return previousValue + parseInt(currentValue.total_bytes);
+			  		},0);
+
+			  		return previousValue + total;;
+				},0);
+
+				//enrich and format
+				data.output = { date: Date.parse(new Date()), stats: [] };
+				for (var prop in data.totals) {
+					delete data.totals[prop].lastTotal;
+					data.output.stats.push({
+						"ip_add":prop, 
+						"mac_add":data.totals[prop].mac_add, 
+						"device_name":data.totals[prop].device_name, 
+						"total_bytes": data.totals[prop].usageToDate.total,	//include for backwards compatibility
+						"today_bytes": data.totals[prop].usageToday.total,	//include for backwards compatibility
+						usageToDate:data.totals[prop].usageToDate, 
+						usageToday:data.totals[prop].usageToday });
+				}
+				
+				res.type('json');
+				data.output.stats.sort(function(a,b){ return (b.usageToday.total || 0) - (a.usageToday.total || 0); });
+				res.json(data.output);
+			}
+		});
+	});
+};
+
+
 exports.drives = function(req, res) {
    	res.header("Access-Control-Allow-Origin", "*");
 	exec("df -h", function(error, stdout, stderr){
@@ -66,7 +143,10 @@ exports.drives = function(req, res) {
 				res.json(500, {"err" : "Disk usage could not be retrieved."});
 	    	}
    			GetDriveUsage(stdout, function(err, drive_usage){
-    			res.json(drive_usage);
+   				if (err !== null) {
+					res.json(500, {"err" : "Disk usage could not be retrieved."});
+	    		} else	
+    				res.json(drive_usage);
 	    	})
 	});
 
@@ -128,30 +208,31 @@ function GetUsageHistory(callback){
 
 function GetCurrentUsage(callback){
 	request(
-		{uri: _settings.routerStatsUri},
+		{uri: _settings.routerStatsUri, strictSSL: false},
 		function(err, response, body){
 			if (err){
 				callback( { msg: "GetCurrentUsage: No response body.", "error": err } );
 			} else {
-				var current_usage = { "date": Date.now(), "uptime": "-", "stats": new Array() };
+				var current_usage = { "date": Date.now(), "stats": new Array() };
 				//Iterate through current usage stats for each device
 				var ip_row_collection = body.match(/"(?:[0-9]{1,3}\.){3}[0-9]{1,3}.*(?=,)/gi);
 				for (i = 0; i < ip_row_collection.length; i++){
 					var row_array = ip_row_collection[i].replace(/(\s|")/g,'').split(',');
-					current_usage.stats[i] = {"ip_add" : row_array[0], "mac_add" : row_array[1], "device_name" : (_settings.namedDevices[row_array[0]] || "unknown"), "total_bytes" : row_array[3] };
+					current_usage.stats[i] = {"ip_add" : row_array[0], "mac_add" : row_array[1], "device_name" : (_settings.namedDevices[row_array[0]] || "unknown"), "total_bytes" : parseInt(row_array[3]) };
 				}
 				callback(err, current_usage);
 			}
         }
 	);
 };
+exports.GetCurrentUsage = GetCurrentUsage;
 
 function SaveUsageHistory(currentUsage, callback){
 	GetUsageHistory(function (err, data) {
 		if (data){
 			//If it's the first day of the month, backup the current file with a _YYYYMM suffix, eg: usage_history_201306.json
 			var _date = new Date(currentUsage.date);
-			if (_date.getDate() == 1){
+			if (_date.getDate() == 1 && _date.getHours() == 0){
 				_date.setDate(_date.getDate()-1); //Move date back 1 day to determine previous month details
 				fs.renameSync(
 					_settings.usageHistoryPath, 
@@ -170,10 +251,16 @@ function SaveUsageHistory(currentUsage, callback){
 			callback( { msg: "SaveUsageHistory: No data found.", "error": err } );
 	});
 }
+exports.SaveUsageHistory = SaveUsageHistory;
 
 function GetDriveUsage(stdout, callback) {
 	var drive_usage = { "date": Date.now(), "drives": new Array() };
 	var drives = stdout.match(/\/dev.*/gi);
+	if (drives == null){
+		callback("Drive usage could not be retrieved.", undefined);	
+		return;
+	}
+	
 	drives.forEach(function(drive){
 		var row_array = drive.split(/\s+/g);
 		drive_usage.drives.push({"mount" : row_array[5], "size" : row_array[1], "avail" : row_array[3], "used" : row_array[4]});
