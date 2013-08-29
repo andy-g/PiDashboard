@@ -143,7 +143,7 @@ exports.drives = function(req, res) {
 				res.json(500, {"err" : "Disk usage could not be retrieved."});
 	    	}
    			GetDriveUsage(stdout, function(err, drive_usage){
-   				if (err !== null) {
+   				if (err) {
 					res.json(500, {"err" : "Disk usage could not be retrieved."});
 	    		} else	
     				res.json(drive_usage);
