@@ -115,7 +115,7 @@ exports.usageSummary = function(req, res) {
 				},0);
 
 				//enrich and format
-				data.output = { date: Date.parse(new Date()), stats: [] };
+				data.output = { date: Date.parse(runDate), stats: [] };
 				for (var prop in data.totals) {
 					delete data.totals[prop].lastTotal;
 					data.output.stats.push({
