@@ -76,7 +76,9 @@ exports.usageSummary = function(req, res) {
 
 				//process each period
 				var total = data.reduce(function(previousValue, currentValue, index, array){
-			  		var jobPeriod = _settings.timePeriods.filter(function (element, index, array) {  return (element.endHour > (new Date(currentValue.date)).getHours()); })[0];
+			  		var jobPeriod = _settings.timePeriods.
+			  			filter(function (element, index, array) {  return (element.endHour >= (new Date(currentValue.date)).getHours()); }).
+						sort(function(a,b){ return a.endHour - b.endHour; })[0];
 					var periodDate = new Date(currentValue.date);
 
 					//process each ip address for period
