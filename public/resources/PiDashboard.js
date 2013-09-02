@@ -9,6 +9,22 @@ window.onload=function(){
 		getUsage();
 	}
 
+	$('.arrow').click(function() {
+		if (!$(this).hasClass('disabled')){
+			var targetDate;
+			var _currentDate = new Date(currentDate);
+			if ($(this).hasClass('left')){
+				targetDate = _currentDate.setDate(_currentDate.getDate()-1)
+			}else{
+				targetDate = _currentDate.setDate(_currentDate.getDate()+1)
+			}
+			if (new Date(targetDate).setHours(0,0,0,0) === new Date(Date.now()).setHours(0,0,0,0)){
+				targetDate = undefined;
+			}
+			getUsage(targetDate);
+		}
+	});
+
 	$("[name='includeicon']").click(function() {
 		if ($(this).hasClass('active')){
 			//console.log("don't click on the active button!!");
@@ -43,7 +59,8 @@ function setServiceStatus(service, status) {
 	});
 }
 
-function getUsage() {
+var currentDate;
+function getUsage(date) {
 	var xhr = new XMLHttpRequest();
 	var abortTimerId = window.setTimeout(function() {
 		xhr.abort();  // synchronously calls onreadystatechange
@@ -59,8 +76,14 @@ function getUsage() {
 			return;
 		}
 
-		//data.stats.sort(function(a,b){ return a.device_name.toUpperCase() > b.device_name.toUpperCase() });
-		data.stats.sort(function(a,b){ return b.today_bytes - a.today_bytes; });
+		currentDate = parseInt(data.date);
+
+		if (new Date(currentDate).setHours(0,0,0,0) !== new Date(Date.now()).setHours(0,0,0,0)) {
+			$('.arrow.right').removeClass('disabled');
+		} 
+		if (new Date(currentDate).getDate() != 1) {
+			$('.arrow.left').removeClass('disabled');
+		}
 
 		var container = document.getElementById("container");
 		var table = document.getElementById("table");
@@ -106,12 +129,15 @@ function getUsage() {
 		};
 
 		xhr.onerror = function(error) {
-			console.log(e);
+			console.log(error);
 			handleError("XMLHttpRequest error.");
 		};
 
-		xhr.open("GET", window.location.protocol + "//" + window.location.host +'/summary', true); //'http://localhost:8080/request'
+		xhr.open("GET", window.location.protocol + "//" + window.location.host +'/summary/'+ (date || ''), true); //'http://localhost:8080/request'
 		xhr.send(null);
+
+		$('.arrow.right').addClass('disabled');
+		$('.arrow.left').addClass('disabled');
 	} catch(e) {
 		handleError();
 		console.log('error');
@@ -164,7 +190,7 @@ function getDriveUsage() {
 		};
 
 		xhr.onerror = function(error) {
-			console.log(e);
+			console.log(error);
 			handleError("XMLHttpRequest error.");
 		};
 
