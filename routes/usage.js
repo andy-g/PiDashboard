@@ -75,14 +75,14 @@ exports.usageSummary = function(req, res) {
 				data.totals = {};
 
 				//process each period
-				var total = data.reduce(function(previousValue, currentValue, index, array){
+				data.reduce(function(previousValue, currentValue, index, array){
 			  		var jobPeriod = _settings.timePeriods.
 			  			filter(function (element, index, array) {  return (element.endHour >= (new Date(currentValue.date)).getHours()); }).
 						sort(function(a,b){ return a.endHour - b.endHour; })[0];
 					var periodDate = new Date(currentValue.date);
 
 					//process each ip address for period
-			  		var total = currentValue.stats.reduce(function(previousValue, currentValue, index, array){
+			  		currentValue.stats.reduce(function(previousValue, currentValue, index, array){
 			  			if (!data.totals[currentValue.ip_add])
 			  				data.totals[currentValue.ip_add] = { usageToDate: { total: 0 }, usageToday: { total: 0 }, lastTotal: 0 };
 			  				//data.totals[currentValue.ip_add] = { usageToDate: {}, usageToday: {}, lastTotal: 0 };
@@ -103,15 +103,16 @@ exports.usageSummary = function(req, res) {
 			  			data.totals[currentValue.ip_add].usageToDate.total = data.totals[currentValue.ip_add].usageToDate.total + periodUsage;
 			  			data.totals[currentValue.ip_add].lastTotal = parseInt(currentValue.total_bytes);
 
+						if (data.totals[currentValue.ip_add].usageToDate.total == 0){
+							delete data.totals[currentValue.ip_add];
+						}
+
 						//Get Today's (runDate) usage (only include if period date is after 00:01 - allow 1 minute delay in midnight run running)
 						if (periodDate > new Date(runDate).setHours(0,1,0,0) && periodDate <= new Date(new Date(runDate).setDate(runDate.getDate()+1)).setHours(0,1,0,0)){
 			  				data.totals[currentValue.ip_add].usageToday[jobPeriod.name] = (data.totals[currentValue.ip_add].usageToday[jobPeriod.name] || 0) + periodUsage;
 			  				data.totals[currentValue.ip_add].usageToday.total = data.totals[currentValue.ip_add].usageToday.total + periodUsage;
 			  			}
-			  			return previousValue + parseInt(currentValue.total_bytes);
 			  		},0);
-
-			  		return previousValue + total;;
 				},0);
 
 				//enrich and format
@@ -129,7 +130,13 @@ exports.usageSummary = function(req, res) {
 				}
 				
 				res.type('json');
-				data.output.stats.sort(function(a,b){ return (b.usageToday.total || 0) - (a.usageToday.total || 0); });
+				data.output.stats.sort(function(a,b){ 
+					if (b.usageToday.total != a.usageToday.total) {
+						return b.usageToday.total - a.usageToday.total;
+					} else {
+						return b.usageToDate.total - a.usageToDate.total;
+					} 
+				});
 				res.json(data.output);
 			}
 		});
