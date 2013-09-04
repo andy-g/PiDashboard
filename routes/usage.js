@@ -65,6 +65,7 @@ exports.usageSummary = function(req, res) {
 	res.header("Access-Control-Allow-Origin", "*");
 	GetCurrentUsage(function (err, current_usage) {
 		GetUsageHistory(function (err, data) {
+			current_usage.isCurrent = true;
 			data = data.concat(current_usage);
 
 			if(err || !data){ 
@@ -77,7 +78,13 @@ exports.usageSummary = function(req, res) {
 				//process each period
 				data.reduce(function(previousValue, currentValue, index, array){
 			  		var jobPeriod = _settings.timePeriods.
-			  			filter(function (element, index, array) {  return (element.endHour >= (new Date(currentValue.date)).getHours()); }).
+			  			filter(function (element, index, array) {  
+			  				if (currentValue.isCurrent){ //Current usage should always be logged against the next period
+			  					return (element.endHour > (new Date(currentValue.date)).getHours()); 
+			  				}
+			  				else
+			  					return (element.endHour >= (new Date(currentValue.date)).getHours()); 
+			  			}).
 						sort(function(a,b){ return a.endHour - b.endHour; })[0];
 					var periodDate = new Date(currentValue.date);
 
@@ -215,13 +222,13 @@ function GetUsageHistory(callback){
 };
 
 function GetCurrentUsage(callback){
+	var current_usage = { "date": Date.now(), "stats": new Array() };
 	request(
 		{uri: _settings.routerStatsUri, strictSSL: false},
 		function(err, response, body){
 			if (err){
 				callback( { msg: "GetCurrentUsage: No response body.", "error": err } );
 			} else {
-				var current_usage = { "date": Date.now(), "stats": new Array() };
 				//Iterate through current usage stats for each device
 				var ip_row_collection = body.match(/"(?:[0-9]{1,3}\.){3}[0-9]{1,3}.*(?=,)/gi);
 				for (i = 0; i < ip_row_collection.length; i++){
