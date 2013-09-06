@@ -3,7 +3,8 @@ var urlparser = require('url'),
 	exec = require('child_process').exec,
 	fs = require('fs'),
 	formatHelper = require('./formatHelper'),
-	_settings = require('../app.config.json');
+	_settings = require('../app.config.json'),
+	schedule = require('node-schedule');
 
 //cache usage snapsot at the start of today
 var _dayStartUsage;
@@ -173,23 +174,62 @@ exports.drives = function(req, res) {
 
 exports.serviceStatus = function(req, res) {
 	res.header("Access-Control-Allow-Origin", "*");
+
+	var service = _settings.services[req.param('service')];
+
+	//If service isn't in config then exit 
+	if (!service){
+		res.json(500, {"err" : "Specified service is not configured"});
+		return;
+	}
+
 	var status = !req.param('status') || !(/start|stop/g).test(req.param('status')) ? "status" : req.param('status');
-	
+	if (req.param('isScheduled')){
+		if (service.jobs) {
+			service.jobs.forEach(function(job){ job.cancel(); });
+			delete service.jobs;
+		} 
+		if (req.param('isScheduled') === 'true' && service.startSchedule && service.endSchedule){
+			var serviceStart = schedule.scheduleJob(service.serviceName + '-start', service.startSchedule, function(){ ExecService(service.serviceName, 'start'); });
+			var serviceStop  = schedule.scheduleJob(service.serviceName + '-stop', service.endSchedule,   function(){ ExecService(service.serviceName, 'stop'); });
+			service.jobs = [serviceStart, serviceStop];
+
+			//if it's currently after startSchedule and before endSchedule, set status = "start"
+			if (serviceStop.nextInvocation() < serviceStart.nextInvocation())
+				status = "start";
+		}
+	} 
+
+	var isScheduled = !!service.jobs;
 	if (status != "status" && req.route.method != "put"){
 		res.json(500, {"err" : "Service status could not be set using a get request, please rather use a put request"});
 		return;
 	}
 
-	exec("sudo /etc/init.d/transmission-daemon " + status, function(error, stdout, stderr){
-		if (status != "status" && error !== null) {
-			console.log('exec error: ' + error + ' stdout: ' + stdout + ' stderr: ' + stderr);
-			res.json(500, {"err" : "Service status could not be " + (status == "start" ? "started" : "stopped") +"."});
-			return;
-	    }
-	    //If we're setting the status, just return what we've set it to (return can come back before service status is changed), otherwise verify output to determine service status
-	    res.json({service: "transmission", status: (status == "status" ? (stdout.indexOf("transmission-daemon is running") > -1) : (status == "start"))});
+	ExecService(service.serviceName, status, function(output){ 
+		if (!output.err) {
+			output.isScheduled = isScheduled;
+			res.json(output);
+		} else {
+			res.json(500, output);
+		}
 	});
 };
+
+function ExecService(serviceName, status, callback){
+	exec("sudo /etc/init.d/" + serviceName + " " + status, function(error, stdout, stderr){
+		if (status != "status" && error !== null) {
+			console.log('exec error: ' + error + ' stdout: ' + stdout + ' stderr: ' + stderr);
+			if (callback)
+				callback({"err" : "Service status could not be " + (status == "start" ? "started" : "stopped") +"."});
+			return;
+	    }
+
+	    //If we're setting the status, just return what we've set it to (return can come back before service status is changed), otherwise verify output to determine service status
+		if (callback)
+			callback({ service: serviceName, status: (status == "status" ? (stdout.indexOf(serviceName + " is running") > -1) : (status == "start")) });
+	});
+}
 
 //Load historic stats & filter to find today's record
 function GetTodaysUsage(callback){

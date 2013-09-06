@@ -38,7 +38,7 @@ rule.hour = _settings.timePeriods.map(function(element){
 });
 rule.minute = 0;
 
-var j = schedule.scheduleJob(rule, function(){
+var j = schedule.scheduleJob('network usage log',rule, function(){
     console.log("Scheduled Job Starting: " + new Date())
     //save current usage to usage file
 	usage.GetCurrentUsage(function(err, current_usage){

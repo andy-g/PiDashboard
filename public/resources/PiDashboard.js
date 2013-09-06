@@ -25,37 +25,47 @@ window.onload=function(){
 		}
 	});
 
-	$("[name='includeicon']").click(function() {
-		if ($(this).hasClass('active')){
+	$("[name='service']").click(function() {
+		if ($(this).val() != 2 && $(this).hasClass('active')){
 			//console.log("don't click on the active button!!");
 			return;
 		}
 		if ($(this).val() == 1) {
-			$("[name='includeicon']:eq(0)").addClass('btn-danger').text('stopping...').addClass('disabled');
-			$("[name='includeicon']:eq(1)").removeClass('btn-success');
+			$("[name='service']:eq(0)").addClass('btn-danger').text('stopping...').addClass('disabled');
+			$("[name='service']:eq(1)").removeClass('btn-success');
 			setServiceStatus("transmission","stop");
-		} else {
-			$("[name='includeicon']:eq(0)").removeClass('btn-danger');
-			$("[name='includeicon']:eq(1)").addClass('btn-success').text('starting...').addClass('disabled');
+		} else if ($(this).val() == 0) {
+			$("[name='service']:eq(0)").removeClass('btn-danger');
+			$("[name='service']:eq(1)").addClass('btn-success').text('starting...').addClass('disabled');
 			setServiceStatus("transmission","start");
+		} else if ($(this).val() == 2) {
+			$("[name='service']:eq(2)").addClass('disabled');
+			setServiceStatus("transmission", undefined, !$(this).hasClass('active'));
 		}
 	});
 };
 
-function setServiceStatus(service, status) {
-	if (status === undefined)
-		data = {"service": service};
-	else
-		data = {"service": service, "status": status};
+function setServiceStatus(service, status, isScheduled) {
+	var data = {"service": service};
+	if (status !== undefined)
+		data.status = status;
+	if (isScheduled !== undefined)
+		data.isScheduled = isScheduled;
 
-	$.ajax({type: "PUT", dataType: "json", url: window.location.protocol + "//" + window.location.host +'/services', data: data}).done(function(data){
-		$("[name='includeicon']:eq(0)").removeClass('btn-danger').text('stop').removeClass('disabled').removeClass('active');
-		$("[name='includeicon']:eq(1)").removeClass('btn-success').text('start').removeClass('disabled').removeClass('active');
+	$.ajax({type: "PUT", dataType: "json", url: window.location.protocol + "//" + window.location.host +'/services', data: data}).always(function(data){
+		$("[name='service']:eq(0)").removeClass('btn-danger').text('stop').removeClass('disabled').removeClass('active');
+		$("[name='service']:eq(1)").removeClass('btn-success').text('start').removeClass('disabled').removeClass('active');
+		$("[name='service']:eq(2)").removeClass('active').removeClass('disabled');
 
 		if(data.status == true)
-			$("[name='includeicon']:eq(1)").addClass('btn-success').text('started').addClass('active');
+			$("[name='service']:eq(1)").addClass('btn-success').text('started').addClass('active');
+		else if (data.status == false)
+			$("[name='service']:eq(0)").addClass('btn-danger').text('stopped').addClass('active');
+
+		if (data.isScheduled == true)
+			$("[name='service']:eq(2)").addClass('active');
 		else
-			$("[name='includeicon']:eq(0)").addClass('btn-danger').text('stopped').addClass('active');
+			$("[name='service']:eq(2)").removeClass('active');
 	});
 }
 

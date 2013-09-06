@@ -13,5 +13,12 @@
 	"dataAllocations":[
 		{ "name": "Night Surfer", "description": "Data available between 23:00 and 5:00", "bytes": 10737418240 },
 		{ "name": "Peak", "description": "Data available between 5:00 and 23:00", "bytes": 10737418240 }
-	]
+	],
+	"services": {
+		"transmission": {
+			"serviceName": "transmission-daemon",
+			"startSchedule": { "hour": 23, "minute": 5 },
+			"endSchedule": { "hour": 4, "minute": 55 }
+		}
+	}
 }
