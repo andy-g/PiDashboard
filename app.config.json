@@ -20,5 +20,14 @@
 			"startSchedule": { "hour": 23, "minute": 5 },
 			"endSchedule": { "hour": 4, "minute": 55 }
 		}
+	},
+	"twitter": {
+		"enableTwitterBot": true,
+		"keys": {
+			"consumer_key": "CONSUMER KEY",
+			"consumer_secret": "CONSUMER SECRET",
+			"access_token_key": "ACCESS TOKEN KEY",
+			"access_token_secret": "ACCESS TOKEN SECRET"
+		}
 	}
 }
