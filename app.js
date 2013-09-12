@@ -18,7 +18,6 @@ app.use(express.static(__dirname + '/public'));
 
 //-----routes-----
 app.get('/', function(req, res){ res.send('hello world'); });
-
 app.get('/summary/:runDate?', usage.usageSummary);
 app.get('/drives', usage.drives);
 app.get('/services/:service?/:status?', usage.serviceStatus);
@@ -38,7 +37,6 @@ rule.minute = 0;
 
 var j = schedule.scheduleJob('network usage log',rule, function(){
     console.log("Scheduled Job Starting: " + new Date())
-    //save current usage to usage file
 	usage.GetCurrentUsage(function(err, current_usage){
 		if (err) { 
 			console.log("save error: " + JSON.stringify(err));
@@ -60,23 +58,35 @@ if (_settings.twitter.enableTwitterBot){
 
 	var twit = new twitter(_settings.twitter.keys);
 
-	twit.stream('user', function(stream) {
-		console.log("Listening for tweets...");
-	    stream.on('data', function(data) {
-	    	if (data.direct_message && data.direct_message.sender_screen_name != 'PiTweetBot'){
-	    		if (data.direct_message.text.match(/IP Address/gi) !== null){
-					request(
-						{ uri: 'http://checkip.dyndns.com/' },
-						function(err, response, body){
-							if (err){ console.log(err);	} 
-							else {
-								var ipAdd = body.match(/[0-9]+(?:\.[0-9]+){3}/)[0];
-					   			twit.newDirectMessage(data.direct_message.sender_screen_name, 'My IP Address as at '+ moment().format('HH:mm:ss') +' is ' + ipAdd, function(data) { console.log(data.text); });
-							}
-					    }
-					);
-	    		}
-	    	}
-	    });
-	});
+	var streamRetryJob = null;
+	startTwitterListener();
+	
+	function startTwitterListener(){
+		twit.stream('user', function(stream) {
+			console.log("Listening for tweets...");
+			if (streamRetryJob) clearInterval(streamRetryJob);
+		    stream.on('data', function(data) {
+		    	if (data.direct_message && data.direct_message.sender_screen_name != 'PiTweetBot'){
+		    		if (data.direct_message.text.match(/IP Address/gi) !== null){
+						request(
+							{ uri: 'http://checkip.dyndns.com/' },
+							function(err, response, body){
+								if (err){ console.log(err);	} 
+								else {
+									var ipAdd = body.match(/[0-9]+(?:\.[0-9]+){3}/)[0];
+						   			twit.newDirectMessage(data.direct_message.sender_screen_name, 'My IP Address as at '+ moment().format('HH:mm:ss') +' is ' + ipAdd, function(data) { console.log(data.text); });
+								}
+						    }
+						);
+		    		}
+		    	}
+		    });
+		    stream.on('error', function(data) {
+		    	stream.destroy();
+		    	console.log('Twitter error, scheduling reconnect');
+		    	streamRetryJob = setInterval(function(){ startTwitterListener(); }, 1000 * 60 * 5);
+		    });
+		    stream.on('end', function(data) { console.log('Twitter Stream Ended'); });
+		});
+	}
 }
