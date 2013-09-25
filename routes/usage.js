@@ -83,6 +83,9 @@ exports.usageSummary = function(req, res) {
 				return element.usageToDate.total != 0;	
 			});
 			res.json(data.output);
+
+			//Nullify variable to force Garbage Collection
+			data = null;
 		});
 	});
 };
@@ -210,6 +213,9 @@ function SaveUsageHistory(currentUsage, callback){
 				_dayStartUsage = currentUsage;
 				callback( {"message" : "usage data saved successfully."} );
 			});
+
+			//Nullify variable to force Garbage Collection
+			data = null;
 		}
 		else 
 			callback( { msg: "SaveUsageHistory: No data found.", "error": err } );
