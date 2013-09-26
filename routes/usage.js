@@ -6,8 +6,6 @@ var urlparser = require('url'),
 	_settings = require('../app.config.json'),
 	schedule = require('node-schedule');
 
-//cache usage snapsot at the start of today
-var _dayStartUsage;
 
 //try cache data, and load it on startup or when rewriting to the file
 exports.usageSummary = function(req, res) {
@@ -152,17 +150,25 @@ exports.serviceStatus = function(req, res) {
 };
 
 function ExecService(serviceName, status, callback){
-	exec("sudo /etc/init.d/" + serviceName + " " + status, function(error, stdout, stderr){
-		if (status != "status" && error !== null) {
-			console.log('exec error: ' + error + ' stdout: ' + stdout + ' stderr: ' + stderr);
-			if (callback)
-				callback({"err" : "Service status could not be " + (status == "start" ? "started" : "stopped") +"."});
-			return;
-	    }
+	var d = require('domain').create();
+	d.on('error', function(err){
+		console.log('Exec Service Error:');
+		console.log(err);
+	});
 
-	    //If we're setting the status, just return what we've set it to (return can come back before service status is changed), otherwise verify output to determine service status
-		if (callback)
-			callback({ service: serviceName, status: (status == "status" ? (stdout.indexOf(serviceName + " is running") > -1) : (status == "start")) });
+	d.run(function(){
+		exec("sudo /etc/init.d/" + serviceName + " " + status, function(error, stdout, stderr){
+			if (status != "status" && error !== null) {
+				console.log('exec error: ' + error + ' stdout: ' + stdout + ' stderr: ' + stderr);
+				if (callback)
+					callback({"err" : "Service status could not be " + (status == "start" ? "started" : "stopped") +"."});
+				return;
+		    }
+
+		    //If we're setting the status, just return what we've set it to (return can come back before service status is changed), otherwise verify output to determine service status
+			if (callback)
+				callback({ service: serviceName, status: (status == "status" ? (stdout.indexOf(serviceName + " is running") > -1) : (status == "start")) });
+		});
 	});
 }
 
@@ -210,7 +216,6 @@ function SaveUsageHistory(currentUsage, callback){
 			}
 
 			fs.writeFile(_settings.usageHistoryPath, JSON.stringify(data.concat(currentUsage), null, "\t"), function(err) {
-				_dayStartUsage = currentUsage;
 				callback( {"message" : "usage data saved successfully."} );
 			});
 

@@ -5,6 +5,12 @@ var	express = require('express'),
 	_settings = require('./app.config.json'),
 	schedule = require('node-schedule');
 
+//Prevent the application from crashing due to any unhandled exceptions
+process.on('uncaughtException', function(err) {
+    console.log('Unhandled exception:');
+    console.log(err);
+});
+
 var options = {
   key: fs.readFileSync('keys/server-key.pem'),
   cert: fs.readFileSync('keys/server-cert.pem')
