@@ -1,8 +1,8 @@
 var	http = require('http'),
 	parseString = require('xml2js').parseString,
-	_settings = require('./app.config.json'),
+	_settings = require('../app.config.json'),
 	events = require("events"),
-	twitterBot = require('./routes/twitterBot'),
+	twitterBot = require('./twitterBot'),
 	exec = require('child_process').exec;
 
 var retryJob = null;
@@ -54,15 +54,20 @@ rssListener.Queue = function(id, callback){
 	d.run(function(){
 		//check service status
 		exec("sudo service transmission-daemon status", function(error, stdout, stderr){
-			var cmd = "transmission-remote --auth "+ _settings.rss.userName +":"+ _settings.rss.password +" -a '" + torrentList[id] + "'";
+			var cmd = "transmission-remote --auth "+ _settings.rss.username +":"+ _settings.rss.password +" -a '" + torrentList[id] + "'";
 			if (stdout.indexOf("is running") == -1)
 				cmd = "sudo service transmission-daemon start ; "+ cmd +" ; sudo service transmission-daemon stop";
+
+			console.log(cmd);
+
+			if (error)
+				console.log(error);
 
 			exec(cmd, function(error, stdout, stderr){
 					if (callback){
 						if (stdout.indexOf('duplicate torrent') > -1)
 							error = "duplicate torrent";
-						callback({ "error": error, "status": stdout.indexOf('responded: "success"') > -1, "id": id });
+						callback(error, stdout.indexOf('responded: "success"') > -1, id);
 					}
 			});
 		});

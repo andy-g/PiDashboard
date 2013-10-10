@@ -20,7 +20,6 @@ twitterBot.SendDirectMessage = function(message, recipient, callback){
 		recipient = _settings.twitter.defaultRecipient;
 	
 	twit.newDirectMessage(recipient, message, function(data) { 
-		console.log(data); 
 		if (callback)
 			callback({ error: null, sent: true });
 	});	

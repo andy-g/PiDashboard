@@ -68,11 +68,12 @@ if (_settings.twitter.enableTwitterBot){
 					console.log("Will queue or download torrent (from app): " + id);
 					rssListener.Queue(id, function(error, status, id){
 						if (status){
-							console.log("Torrent successfuly added event:" + data.title);
+							console.log("Torrent successfuly added event:" + id);
 							twitterBot.SendDirectMessage("Torrent #"+ id + " has been successfully queued");
 						} else {
-							console.log("Torrent not successfuly added event:" + data.title);
-							twitterBot.SendDirectMessage("Torrent #"+ id + " couold not besuccessfully queued (" + error + ")");
+							console.log("Torrent not successfuly added event:");
+							console.log(error);
+							twitterBot.SendDirectMessage("Torrent #"+ id + " could not be successfully queued (" + error + ")");
 						}
 					});
 				})
@@ -85,7 +86,7 @@ if (_settings.twitter.enableTwitterBot){
 //-----listen for rss
 var rssListener;
 if (_settings.rss.enableRssListener){
-	rssListener = require('./rssListener');
+	rssListener = require('./routes/rssListener');
 	rssListener.on('newTorrent',function(data){
 		console.log("New torrent event:" + data.title);
 		twitterBot.SendDirectMessage("Would you like to 'QUEUE' or 'DL' '"+ data.title +"' ("+ (data.size / 1024 / 1024).toFixed(2) +"MB) #" + data.id);
