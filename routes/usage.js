@@ -1,5 +1,4 @@
-var urlparser = require('url'),
-	request = require('request'),
+var request = require('request'),
 	exec = require('child_process').exec,
 	fs = require('fs'),
 	formatHelper = require('./formatHelper'),

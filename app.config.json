@@ -28,6 +28,15 @@
 			"consumer_secret": "CONSUMER SECRET",
 			"access_token_key": "ACCESS TOKEN KEY",
 			"access_token_secret": "ACCESS TOKEN SECRET"
-		}
+		},
+		"defaultRecipient": "@twitter_user"
+	},
+	"rss": {
+		"enableRssListener": true,
+		"rssPaths": [
+			"http://path_to_rss_feed"
+		],
+		"username": "transmission-username",
+		"password": "transmission-password"
 	}
 }

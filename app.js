@@ -58,5 +58,39 @@ console.log('Scheduled job started for time periods (hours of day): ' + rule.hou
 //-----listen for direct messages
 if (_settings.twitter.enableTwitterBot){
 	var twitterBot = require('./routes/twitterBot');
+	twitterBot.on('tweet',function(data){
+		if (data.direct_message && data.direct_message.sender_screen_name != 'PiTweetBot'){
+			console.log('new tweet event handler' + data.direct_message.text);
+			
+			if (_settings.rss.enableRssListener && /DL #|QUEUE #/i.test(data.direct_message.text)) {
+				//should probably rather allow for sending an array of id's to the queue function and can queue them together and report on that
+				data.direct_message.text.match(/#[0-9]+/gi).map(function(num){return num.replace(/#/,'')}).forEach(function(id){
+					console.log("Will queue or download torrent (from app): " + id);
+					rssListener.Queue(id, function(error, status, id){
+						if (status){
+							console.log("Torrent successfuly added event:" + data.title);
+							twitterBot.SendDirectMessage("Torrent #"+ id + " has been successfully queued");
+						} else {
+							console.log("Torrent not successfuly added event:" + data.title);
+							twitterBot.SendDirectMessage("Torrent #"+ id + " couold not besuccessfully queued (" + error + ")");
+						}
+					});
+				})
+			}
+		}
+	})
 	twitterBot.StartTwitterListener();
 }
+
+//-----listen for rss
+var rssListener;
+if (_settings.rss.enableRssListener){
+	rssListener = require('./rssListener');
+	rssListener.on('newTorrent',function(data){
+		console.log("New torrent event:" + data.title);
+		twitterBot.SendDirectMessage("Would you like to 'QUEUE' or 'DL' '"+ data.title +"' ("+ (data.size / 1024 / 1024).toFixed(2) +"MB) #" + data.id);
+	})
+	rssListener.RssCheck();
+}
+
+//heapdump.writeSnapshot();
