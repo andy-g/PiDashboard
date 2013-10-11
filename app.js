@@ -2,6 +2,7 @@ var	express = require('express'),
 	fs = require('fs'),
 	usage = require('./routes/usage'),
 	https = require('https'),
+	request = require('request'),
 	_settings = require('./app.config.json'),
 	schedule = require('node-schedule');
 
@@ -12,8 +13,8 @@ process.on('uncaughtException', function(err) {
 });
 
 var options = {
-  key: fs.readFileSync('keys/server-key.pem'),
-  cert: fs.readFileSync('keys/server-cert.pem')
+	key: fs.readFileSync('keys/server-key.pem'),
+	cert: fs.readFileSync('keys/server-cert.pem')
 };
 
 var app = express();
@@ -60,22 +61,24 @@ if (_settings.twitter.enableTwitterBot){
 	var twitterBot = require('./routes/twitterBot');
 	twitterBot.on('tweet',function(data){
 		if (data.direct_message && data.direct_message.sender_screen_name != 'PiTweetBot'){
-			console.log('new tweet event handler' + data.direct_message.text);
+			console.log('new tweet event handler: ' + data.direct_message.text);
 			
-			if (_settings.rss.enableRssListener && /DL #|QUEUE #/i.test(data.direct_message.text)) {
-				//should probably rather allow for sending an array of id's to the queue function and can queue them together and report on that
-				data.direct_message.text.match(/#[0-9]+/gi).map(function(num){return num.replace(/#/,'')}).forEach(function(id){
-					console.log("Will queue or download torrent (from app): " + id);
-					rssListener.Queue(id, function(error, status, id){
-						if (status){
-							console.log("Torrent successfuly added event:" + id);
-							twitterBot.SendDirectMessage("Torrent #"+ id + " has been successfully queued");
-						} else {
-							console.log("Torrent not successfuly added event:");
-							console.log(error);
-							twitterBot.SendDirectMessage("Torrent #"+ id + " could not be successfully queued (" + error + ")");
+			//--Retrieve Current public IP Address
+			if (data.direct_message.text.match(/IP Address/gi) !== null){
+				request(
+					{ uri: 'http://checkip.dyndns.com/' },
+					function(err, response, body){
+						if (err){ console.log(err);	} else {
+				   			twit.newDirectMessage(data.direct_message.sender_screen_name, 'My IP Address as at '+ moment().format('HH:mm:ss') +' is ' + body.match(/[0-9]+(?:\.[0-9]+){3}/)[0]);
 						}
-					});
+				    }
+				);
+			} 
+
+			//--Queue or Dowload Torrent(s)
+			else if (_settings.rss.enableRssListener && /DL #|QUEUE #/i.test(data.direct_message.text)) {
+				data.direct_message.text.match(/#[0-9]+/gi).map(function(num){return num.replace(/#/,'')}).forEach(function(id){
+					rssListener.AddDownload(id, /DL #/i.test(data.direct_message.text));
 				})
 			}
 		}
@@ -90,8 +93,16 @@ if (_settings.rss.enableRssListener){
 	rssListener.on('newTorrent',function(data){
 		console.log("New torrent event:" + data.title);
 		twitterBot.SendDirectMessage("Would you like to 'QUEUE' or 'DL' '"+ data.title +"' ("+ (data.size / 1024 / 1024).toFixed(2) +"MB) #" + data.id);
-	})
+	});
+	rssListener.on('torrentAdded',function(data){
+		if (data.status){
+			console.log("Torrent #"+ data.id +" successfuly added");
+			twitterBot.SendDirectMessage("Torrent #"+ data.id + " has been successfully added");
+		} else {
+			console.log("Torrent #"+ data.id +" not successfuly added:");
+			console.log(error);
+			twitterBot.SendDirectMessage("Torrent #"+ data.id +" could not be successfully added (" + data.error + ")");
+		}
+	});
 	rssListener.RssCheck();
 }
-
-//heapdump.writeSnapshot();

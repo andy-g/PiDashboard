@@ -16,9 +16,9 @@ rssListener.RssCheck = function(retryCount){
 		res.on('end', function(){
 			parseString(pageData, function (err, result) {
  				if (err){ //schedule re-run in 5 seconds, maximum of 3 retries
-			 		//console.log("Error:" + err);
 			 		if (retryCount >= 3){
 			 			console.log("Error retrieving rss, retrying count exceeded");
+			 			console.log(err);
 						retryJob = setTimeout(function(){ rssListener.RssCheck(); }, 1000 * 60 * 60);
 			 			return;
 			 		}
@@ -42,33 +42,30 @@ rssListener.RssCheck = function(retryCount){
 	});
 }
 
-rssListener.Queue = function(id, callback){
+rssListener.AddDownload = function(id, startDownload){//, callback){
 	console.log("Will queue or download torrent (from rssListener): " + torrentList[id]);
 
 	var d = require('domain').create();
 	d.on('error', function(err){
-		console.log('Exec Service Error:');
+		console.log('Exec Torrent Add Error:');
 		console.log(err);
 	});
 
 	d.run(function(){
 		//check service status
 		exec("sudo service transmission-daemon status", function(error, stdout, stderr){
-			var cmd = "transmission-remote --auth "+ _settings.rss.username +":"+ _settings.rss.password +" -a '" + torrentList[id] + "'";
+			var cmd = "transmission-remote --auth "+ _settings.rss.username +":"+ _settings.rss.password +
+				//(startDownload ? " --no-start-paused" : " --start-paused") +
+				" --no-start-paused" + //Always add the torrent unpaused, queued torrents won't leave the service running though
+				" -a '" + torrentList[id] + "'";
+
 			if (stdout.indexOf("is running") == -1)
-				cmd = "sudo service transmission-daemon start ; "+ cmd +" ; sudo service transmission-daemon stop";
-
-			console.log(cmd);
-
-			if (error)
-				console.log(error);
+				cmd = "sudo service transmission-daemon start; "+ cmd + (startDownload ? "" : "; sudo service transmission-daemon stop");
 
 			exec(cmd, function(error, stdout, stderr){
-					if (callback){
 						if (stdout.indexOf('duplicate torrent') > -1)
 							error = "duplicate torrent";
-						callback(error, stdout.indexOf('responded: "success"') > -1, id);
-					}
+					rssListener.emit('torrentAdded', { "error": error, "status": stdout.indexOf('responded: "success"') > -1, "id": id });
 			});
 		});
 	});
