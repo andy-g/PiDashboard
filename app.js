@@ -8,8 +8,8 @@ var	express = require('express'),
 
 //Prevent the application from crashing due to any unhandled exceptions
 process.on('uncaughtException', function(err) {
-    console.log('Unhandled exception:');
-    console.log(err);
+	console.error(new Date().toJSON() + ' unhandled exception!', err);
+	console.log(err.stack);
 });
 
 var options = {
@@ -43,10 +43,10 @@ rule.hour = _settings.timePeriods.map(function(element){
 rule.minute = 0;
 
 var j = schedule.scheduleJob('network usage log',rule, function(){
-    console.log("Scheduled Job Starting: " + new Date())
+    console.log(new Date().toJSON() + " Scheduled Job Starting: ")
 	usage.GetCurrentUsage(function(err, current_usage){
 		if (err) { 
-			console.log("save error: " + JSON.stringify(err));
+			console.log(new Date().toJSON() + " save error: " + JSON.stringify(err));
 		} else {
 			usage.SaveUsageHistory(current_usage, function(message){
 				console.log(message);
@@ -54,14 +54,14 @@ var j = schedule.scheduleJob('network usage log',rule, function(){
 		}
 	});
 });
-console.log('Scheduled job started for time periods (hours of day): ' + rule.hour);
+console.log(new Date().toJSON() + ' Scheduled job started for time periods (hours of day): ' + rule.hour);
 
 //-----listen for direct messages
 if (_settings.twitter.enableTwitterBot){
 	var twitterBot = require('./routes/twitterBot');
 	twitterBot.on('tweet',function(data){
 		if (data.direct_message && data.direct_message.sender_screen_name != 'PiTweetBot'){
-			console.log('new tweet event handler: ' + data.direct_message.text);
+			console.log(new Date().toJSON() + ' new tweet event handler: ' + data.direct_message.text);
 			
 			//--Retrieve Current public IP Address
 			if (data.direct_message.text.match(/IP Address/gi) !== null){
@@ -91,15 +91,15 @@ var rssListener;
 if (_settings.rss.enableRssListener){
 	rssListener = require('./routes/rssListener');
 	rssListener.on('newTorrent',function(data){
-		console.log("New torrent event:" + data.title);
+		console.log(new Date().toJSON() + " New torrent event:" + data.title);
 		twitterBot.SendDirectMessage("Would you like to 'QUEUE' or 'DL' '"+ data.title +"' ("+ (data.size / 1024 / 1024).toFixed(2) +"MB) #" + data.id);
 	});
 	rssListener.on('torrentAdded',function(data){
 		if (data.status){
-			console.log("Torrent #"+ data.id +" successfuly added");
+			console.log(new Date().toJSON() + " Torrent #"+ data.id +" successfuly added");
 			twitterBot.SendDirectMessage("Torrent #"+ data.id + " has been successfully added");
 		} else {
-			console.log("Torrent #"+ data.id +" not successfuly added:");
+			console.log(new Date().toJSON() + " Torrent #"+ data.id +" not successfuly added:");
 			console.log(error);
 			twitterBot.SendDirectMessage("Torrent #"+ data.id +" could not be successfully added (" + data.error + ")");
 		}
