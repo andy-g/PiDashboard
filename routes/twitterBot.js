@@ -24,6 +24,7 @@ twitterBot.SendDirectMessage = d.bind(function(message, recipient, callback){
 	twit.newDirectMessage(recipient, message, function(data) { 
 		if (data instanceof Error) {
 			console.log(data);
+			console.log(message);
 			console.log(data.stack);
 		}
 

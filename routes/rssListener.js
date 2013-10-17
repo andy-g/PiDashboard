@@ -8,30 +8,28 @@ var	http = require('http'),
 
 var d = domain.create();
 d.on('error', function(er) {
-  console.error(new Date().toJSON() + ' Caught rssListener error!', er);
-  console.log(er.stack);
+	console.log(new Date().toJSON() + ' Caught rssListener error!');
+	console.error(er.stack);
 });
 
 var retryJob = null;
 var torrentList = [];
 var rssListener = new events.EventEmitter(); 
-rssListener.RssCheck = d.bind(function(retryCount){
+rssListener.RssCheck = d.bind(function(){
 	http.get(_settings.rss.rssPaths[0], function(res){
+		if (res.statusCode != 200){
+			console.log(new Date().toJSON() + " Error retrieving rss, http statusCode: " + res.statusCode);
+			retryJob = setTimeout(function(){ rssListener.RssCheck(); }, 1000 * 60 * 60); //schedule re-run in 1 hours
+		}
+
 		var pageData = "";
 		res.setEncoding('utf8');
   		res.on('data', function (chunk) { pageData += chunk; });
 		res.on('end', function(){
 			parseString(pageData, function (err, result) {
- 				if (err){ //schedule re-run in 5 seconds, maximum of 3 retries
-			 		if (retryCount >= 3){
-			 			console.log(new Date().toJSON() + " Error retrieving rss, retrying count exceeded");
+				if (err){ 
+					console.log(new Date().toJSON() + " Error parsing rss");
 			 			console.log(err);
-						retryJob = setTimeout(function(){ rssListener.RssCheck(); }, 1000 * 60 * 60);
-			 			return;
-			 		}
-			 		console.log(new Date().toJSON() + " Error retrieving rss, retrying in 5 seconds:");
-			 		retryJob = setTimeout(function(){ rssListener.RssCheck((!retryCount ? 0 : retryCount) + 1); }, 1000 * 5);
-			 		return;
 			 	} else {
 			 		result.rss.channel[0].item.forEach(function(torrent){
 			 			if (torrentList.indexOf(torrent.enclosure[0].$.url) > -1)
@@ -44,7 +42,6 @@ rssListener.RssCheck = d.bind(function(retryCount){
 			 	}
 				retryJob = setTimeout(function(){ rssListener.RssCheck(); }, 1000 * 60 * 60); //schedule re-run in 1 hours
 			});
-
   		});
 	});
 	});

@@ -92,7 +92,8 @@ if (_settings.rss.enableRssListener){
 	rssListener = require('./routes/rssListener');
 	rssListener.on('newTorrent',function(data){
 		console.log(new Date().toJSON() + " New torrent event:" + data.title);
-		twitterBot.SendDirectMessage("Would you like to 'QUEUE' or 'DL' '"+ data.title +"' ("+ (data.size / 1024 / 1024).toFixed(2) +"MB) #" + data.id);
+		twitterBot.SendDirectMessage("Queueing '"+ data.title +"' ("+ (data.size / 1024 / 1024).toFixed(2) +"MB) #" + data.id);
+		rssListener.AddDownload(data.id, false);
 	});
 	rssListener.on('torrentAdded',function(data){
 		if (data.status){
@@ -100,8 +101,8 @@ if (_settings.rss.enableRssListener){
 			twitterBot.SendDirectMessage("Torrent #"+ data.id + " has been successfully added");
 		} else {
 			console.log(new Date().toJSON() + " Torrent #"+ data.id +" not successfuly added:");
-			console.log(error);
-			twitterBot.SendDirectMessage("Torrent #"+ data.id +" could not be successfully added (" + data.error + ")");
+			console.log(data.error);
+			twitterBot.SendDirectMessage("Torrent #"+ data.id +" could not be successfully added (check log)");
 		}
 	});
 	rssListener.RssCheck();
