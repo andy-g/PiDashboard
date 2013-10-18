@@ -69,7 +69,7 @@ if (_settings.twitter.enableTwitterBot){
 					{ uri: 'http://checkip.dyndns.com/' },
 					function(err, response, body){
 						if (err){ console.log(err);	} else {
-				   			twit.newDirectMessage(data.direct_message.sender_screen_name, 'My IP Address as at '+ moment().format('HH:mm:ss') +' is ' + body.match(/[0-9]+(?:\.[0-9]+){3}/)[0]);
+				   			twitterBot.SendDirectMessage('My IP Address as at '+ moment().format('HH:mm:ss') +' is ' + body.match(/[0-9]+(?:\.[0-9]+){3}/)[0], data.direct_message.sender_screen_name);
 						}
 				    }
 				);
@@ -97,8 +97,8 @@ if (_settings.rss.enableRssListener){
 	});
 	rssListener.on('torrentAdded',function(data){
 		if (data.status){
-			console.log(new Date().toJSON() + " Torrent #"+ data.id +" successfuly added");
-			twitterBot.SendDirectMessage("Torrent #"+ data.id + " has been successfully added");
+			console.log(new Date().toJSON() + " Torrent #"+ data.id +" successfuly queued" + (data.error ? " (" + data.error + ")" : ""));
+			twitterBot.SendDirectMessage("Torrent #"+ data.id + " has been successfully queued" + (data.error ? " (" + data.error + ")" : ""));
 		} else {
 			console.log(new Date().toJSON() + " Torrent #"+ data.id +" not successfuly added:");
 			console.log(data.error);

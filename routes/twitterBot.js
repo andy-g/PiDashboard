@@ -41,15 +41,13 @@ twitterBot.StartTwitterListener = d.bind(function(){
 	    });
 		stream.on('error', function(data) {
 			console.log(new Date().toJSON() + ' Twitter error, scheduling reconnect');
-			console.log(data);
 			stream.destroy();
-			streamRetryJob = setTimeout(function(){ StartTwitterListener(); }, 1000 * 30);
+			streamRetryJob = setTimeout(function(){ twitterBot.StartTwitterListener(); }, 1000 * 30);
 		});
 		stream.on('end', function(data) { 
 			console.log(new Date().toJSON() + ' Twitter Stream Ended'); 
-			console.log(data);
 			stream.destroy();
-			streamRetryJob = setTimeout(function(){ StartTwitterListener(); }, 1000 * 30);
+			streamRetryJob = setTimeout(function(){ twitterBot.StartTwitterListener(); }, 1000 * 30);
 		});
 	});
 });
