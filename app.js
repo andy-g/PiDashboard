@@ -99,12 +99,12 @@ if (_settings.rss.enableRssListener){
 	});
 	rssListener.on('torrentAdded',function(data){
 		if (data.status){
-			console.log(new Date().toJSON() + " Torrent #"+ data.id +" successfuly queued" + (data.error ? " (" + data.error + ")" : ""));
-			twitterBot.SendDirectMessage("Torrent #"+ data.id + " has been successfully queued" + (data.error ? " (" + data.error + ")" : ""));
+			console.log(new Date().toJSON() + " Torrent(s) successfuly queued" + (data.error ? " (" + data.error + ")" : ""));
+			twitterBot.SendDirectMessage("Torrent(s) successfully queued" + (data.error ? " (" + data.error + ")" : ""));
 		} else {
-			console.log(new Date().toJSON() + " Torrent #"+ data.id +" not successfuly added:");
+			console.log(new Date().toJSON() + " Torrent(s) not successfuly added");
 			console.log(data.error);
-			twitterBot.SendDirectMessage("Torrent #"+ data.id +" could not be successfully added (check log)");
+			twitterBot.SendDirectMessage("Torrent(s) not successfully added" + (data.error ? " (" + data.error + ")" : ""));
 		}
 	});
 	rssListener.RssCheck();

@@ -67,7 +67,7 @@ rssListener.AddDownloads = d.bind(function(ids, startDownload){//, callback){
 				console.error(error,stdout,stderr);
 						if (stdout.indexOf('duplicate torrent') > -1)
 							error = "duplicate torrent";
-					rssListener.emit('torrentAdded', { "error": error, "status": stdout.indexOf('responded: "success"') > -1, "id": id });
+				rssListener.emit('torrentAdded', { "error": error + " " + stderr, "status": stdout.match(/responded: \"success\"/gi).length == (ids.length * 2), "ids": ids });
 			});
 		});
 	});
