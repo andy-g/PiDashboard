@@ -6,8 +6,9 @@ var
 
 var d = domain.create();
 d.on('error', function(er) {
-  console.error(new Date().toJSON() + ' Caught twitterBot error!', er);
-  console.log(er.stack);
+	console.error(new Date().toJSON() + ' Caught twitterBot error!', er);
+	console.log(er.stack);
+	twitterBot.emit('error', er);
 });
 
 var twit = new twitter(_settings.twitter.keys);
@@ -21,15 +22,18 @@ twitterBot.SendDirectMessage = d.bind(function(message, recipient, callback){
 	if (!recipient)
 		recipient = _settings.twitter.defaultRecipient;
 		
+	message = message.substr(0,140);
 	twit.newDirectMessage(recipient, message, function(data) { 
+		var err;
 		if (data instanceof Error) {
+			err = data;
 			console.log(data);
 			console.log(message);
 			console.log(data.stack);
 		}
 
 		if (callback)
-			callback({ error: null, sent: true });
+			callback({ error: err, message: message, recipient: recipient });
 	});	
 });
 

@@ -20,6 +20,7 @@ rssListener.RssCheck = d.bind(function(){
 		if (res.statusCode != 200){
 			console.log(new Date().toJSON() + " Error retrieving rss, http statusCode: " + res.statusCode);
 			retryJob = setTimeout(function(){ rssListener.RssCheck(); }, 1000 * 60 * 60); //schedule re-run in 1 hours
+			return;
 		}
 
 		var pageData = "";
@@ -31,14 +32,16 @@ rssListener.RssCheck = d.bind(function(){
 					console.log(new Date().toJSON() + " Error parsing rss");
 			 			console.log(err);
 			 	} else {
+					var torrents = [];
 			 		result.rss.channel[0].item.forEach(function(torrent){
 			 			if (torrentList.indexOf(torrent.enclosure[0].$.url) > -1)
 			 				console.log(new Date().toJSON() + " Ignoring old torrent: "+ torrent.title +"' ("+ (torrent['torrent:contentLength'] / 1024 / 1024).toFixed(2) +"MB)" );	
 			 			else {
 			 				torrentList.push(torrent.enclosure[0].$.url);
-			 				rssListener.emit('newTorrent', { "title": torrent.title, "size": torrent['torrent:contentLength'], "id": torrentList.length -1 });
+							torrents.push({ "title": torrent.title, "size": torrent['torrent:contentLength'], "id": torrentList.length -1 })
 			 			}
 			 		}) 
+					rssListener.emit('newTorrents', torrents); 
 			 	}
 				retryJob = setTimeout(function(){ rssListener.RssCheck(); }, 1000 * 60 * 60); //schedule re-run in 1 hours
 			});
@@ -46,19 +49,22 @@ rssListener.RssCheck = d.bind(function(){
 	});
 	});
 
-rssListener.AddDownload = d.bind(function(id, startDownload){//, callback){
-	console.log(new Date().toJSON() + " Will queue or download torrent (from rssListener): " + torrentList[id]);
-
+rssListener.AddDownloads = d.bind(function(ids, startDownload){//, callback){
+	//console.log(new Date().toJSON() + " Will queue or download torrent (from rssListener): " + torrentList[id]);
 		exec("sudo service transmission-daemon status", function(error, stdout, stderr){
-			var cmd = "transmission-remote --auth "+ _settings.rss.username +":"+ _settings.rss.password +
+		var cmd = '';
+		ids.forEach(function(id){
+			cmd = cmd + " transmission-remote --auth "+ _settings.rss.username +":"+ _settings.rss.password +
 				//(startDownload ? " --no-start-paused" : " --start-paused") +
 				" --no-start-paused" + //Always add the torrent unpaused, queued torrents won't leave the service running though
-				" -a '" + torrentList[id] + "'";
+				" -a '" + torrentList[id] + "'; ";
+		})
 
 			if (stdout.indexOf("is running") == -1)
-				cmd = "sudo service transmission-daemon start; "+ cmd + (startDownload ? "" : "; sudo service transmission-daemon stop");
+			cmd = "sudo service transmission-daemon start; "+ cmd + (startDownload ? "" : "sudo service transmission-daemon stop");
 
 			exec(cmd, function(error, stdout, stderr){
+				console.error(error,stdout,stderr);
 						if (stdout.indexOf('duplicate torrent') > -1)
 							error = "duplicate torrent";
 					rssListener.emit('torrentAdded', { "error": error, "status": stdout.indexOf('responded: "success"') > -1, "id": id });

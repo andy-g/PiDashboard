@@ -43,7 +43,7 @@ rule.hour = _settings.timePeriods.map(function(element){
 rule.minute = 0;
 
 var j = schedule.scheduleJob('network usage log',rule, function(){
-    console.log(new Date().toJSON() + " Scheduled Job Starting: ")
+	console.log(new Date().toJSON() + " Scheduled Job Starting: ")
 	usage.GetCurrentUsage(function(err, current_usage){
 		if (err) { 
 			console.log(new Date().toJSON() + " save error: " + JSON.stringify(err));
@@ -69,17 +69,15 @@ if (_settings.twitter.enableTwitterBot){
 					{ uri: 'http://checkip.dyndns.com/' },
 					function(err, response, body){
 						if (err){ console.log(err);	} else {
-				   			twitterBot.SendDirectMessage('My IP Address as at '+ moment().format('HH:mm:ss') +' is ' + body.match(/[0-9]+(?:\.[0-9]+){3}/)[0], data.direct_message.sender_screen_name);
+							twitterBot.SendDirectMessage('My IP Address as at '+ moment().format('HH:mm:ss') +' is ' + body.match(/[0-9]+(?:\.[0-9]+){3}/)[0], data.direct_message.sender_screen_name);
 						}
-				    }
+					}
 				);
 			} 
 
 			//--Queue or Dowload Torrent(s)
 			else if (_settings.rss.enableRssListener && /DL #|QUEUE #/i.test(data.direct_message.text)) {
-				data.direct_message.text.match(/#[0-9]+/gi).map(function(num){return num.replace(/#/,'')}).forEach(function(id){
-					rssListener.AddDownload(id, /DL #/i.test(data.direct_message.text));
-				})
+				rssListener.AddDownloads(data.direct_message.text.match(/#[0-9]+/gi).map(function(num){ return num.replace(/#/,'') }), /DL #/i.test(data.direct_message.text));
 			}
 		}
 	})
@@ -90,10 +88,14 @@ if (_settings.twitter.enableTwitterBot){
 var rssListener;
 if (_settings.rss.enableRssListener){
 	rssListener = require('./routes/rssListener');
-	rssListener.on('newTorrent',function(data){
+	rssListener.on('newTorrents',function(data){
 		console.log(new Date().toJSON() + " New torrent event:" + data.title);
-		twitterBot.SendDirectMessage("Queueing '"+ data.title +"' ("+ (data.size / 1024 / 1024).toFixed(2) +"MB) #" + data.id);
-		rssListener.AddDownload(data.id, false);
+		twitterBot.SendDirectMessage("Adding" +
+			data.reduce(function(prev, curr){ 
+				return prev + " " + data.title + " (" + (data.size / 1024 / 1024).toFixed(2) + "MB), ";
+			}, "").slice(0,-1);
+		);
+		rssListener.AddDownloads(data.map(function(element){ return element.id; }), false);
 	});
 	rssListener.on('torrentAdded',function(data){
 		if (data.status){
