@@ -89,11 +89,11 @@ var rssListener;
 if (_settings.rss.enableRssListener){
 	rssListener = require('./routes/rssListener');
 	rssListener.on('newTorrents',function(data){
-		console.log(new Date().toJSON() + " New torrent event:" + data.title);
+		console.log(new Date().toJSON() + " New torrent event");
 		twitterBot.SendDirectMessage("Adding" +
 			data.reduce(function(prev, curr){ 
-				return prev + " " + data.title + " (" + (data.size / 1024 / 1024).toFixed(2) + "MB), ";
-			}, "").slice(0,-1);
+				return prev + " " + curr.title + " (" + (curr.size / 1024 / 1024).toFixed(2) + "MB),";
+			}, "").slice(0,-1)
 		);
 		rssListener.AddDownloads(data.map(function(element){ return element.id; }), false);
 	});
