@@ -25,33 +25,34 @@ rssListener.RssCheck = d.bind(function(){
 
 		var pageData = "";
 		res.setEncoding('utf8');
-  		res.on('data', function (chunk) { pageData += chunk; });
+		res.on('data', function (chunk) { pageData += chunk; });
 		res.on('end', function(){
 			parseString(pageData, function (err, result) {
 				if (err){ 
 					console.log(new Date().toJSON() + " Error parsing rss");
-			 			console.log(err);
-			 	} else {
+					console.log(err);
+				} else {
 					var torrents = [];
-			 		result.rss.channel[0].item.forEach(function(torrent){
-			 			if (torrentList.indexOf(torrent.enclosure[0].$.url) > -1)
-			 				console.log(new Date().toJSON() + " Ignoring old torrent: "+ torrent.title +"' ("+ (torrent['torrent:contentLength'] / 1024 / 1024).toFixed(2) +"MB)" );	
-			 			else {
-			 				torrentList.push(torrent.enclosure[0].$.url);
+					result.rss.channel[0].item.forEach(function(torrent){
+						if (torrentList.indexOf(torrent.enclosure[0].$.url) > -1)
+							console.log(new Date().toJSON() + " Ignoring old torrent: "+ torrent.title +"' ("+ (torrent['torrent:contentLength'] / 1024 / 1024).toFixed(2) +"MB)" );	
+						else {
+							torrentList.push(torrent.enclosure[0].$.url);
 							torrents.push({ "title": torrent.title, "size": torrent['torrent:contentLength'], "id": torrentList.length -1 })
-			 			}
-			 		}) 
-					rssListener.emit('newTorrents', torrents); 
-			 	}
+						}
+					})
+					if (torrents.length > 0)
+						rssListener.emit('newTorrents', torrents); 
+				}
 				retryJob = setTimeout(function(){ rssListener.RssCheck(); }, 1000 * 60 * 60); //schedule re-run in 1 hours
 			});
-  		});
+		});
 	});
-	});
+});
 
 rssListener.AddDownloads = d.bind(function(ids, startDownload){//, callback){
 	//console.log(new Date().toJSON() + " Will queue or download torrent (from rssListener): " + torrentList[id]);
-		exec("sudo service transmission-daemon status", function(error, stdout, stderr){
+	exec("sudo service transmission-daemon status", function(error, stdout, stderr){
 		var cmd = '';
 		ids.forEach(function(id){
 			cmd = cmd + " transmission-remote --auth "+ _settings.rss.username +":"+ _settings.rss.password +
@@ -59,17 +60,17 @@ rssListener.AddDownloads = d.bind(function(ids, startDownload){//, callback){
 				" --no-start-paused" + //Always add the torrent unpaused, queued torrents won't leave the service running though
 				" -a '" + torrentList[id] + "'; ";
 		})
-
-			if (stdout.indexOf("is running") == -1)
+		
+		if (stdout.indexOf("is running") == -1)
 			cmd = "sudo service transmission-daemon start; "+ cmd + (startDownload ? "" : "sudo service transmission-daemon stop");
 
-			exec(cmd, function(error, stdout, stderr){
+		exec(cmd, function(error, stdout, stderr){
 				console.error(error,stdout,stderr);
-						if (stdout.indexOf('duplicate torrent') > -1)
-							error = "duplicate torrent";
-				rssListener.emit('torrentAdded', { "error": error + " " + stderr, "status": stdout.match(/responded: \"success\"/gi).length == (ids.length * 2), "ids": ids });
-			});
+				if (stdout.indexOf('duplicate torrent') > -1)
+						error = "duplicate torrent";
+				rssListener.emit('torrentAdded', { "error": error, "status": stdout.match(/responded: \"success\"/gi).length == (ids.length * 2), "ids": ids });
 		});
 	});
+});
 
 module.exports = rssListener;
