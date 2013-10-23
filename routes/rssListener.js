@@ -6,20 +6,25 @@ var	http = require('http'),
 	exec = require('child_process').exec,
 	domain = require('domain');
 
+var retryJobId = null;
+var torrentList = [];
+var rssListener = new events.EventEmitter(); 
+
 var d = domain.create();
 d.on('error', function(er) {
 	console.log(new Date().toJSON() + ' Caught rssListener error!');
 	console.error(er.stack);
+	
+	//Clear an existing scheduled timeout (if present), and then reschedule
+	clearTimeout(retryJobId);
+	retryJobId = setTimeout(function(){ rssListener.RssCheck(); }, _settings.rss.interval);
 });
 
-var retryJob = null;
-var torrentList = [];
-var rssListener = new events.EventEmitter(); 
 rssListener.RssCheck = d.bind(function(){
 	http.get(_settings.rss.rssPaths[0], function(res){
 		if (res.statusCode != 200){
 			console.log(new Date().toJSON() + " Error retrieving rss, http statusCode: " + res.statusCode);
-			retryJob = setTimeout(function(){ rssListener.RssCheck(); }, 1000 * 60 * 60); //schedule re-run in 1 hours
+			retryJobId = setTimeout(function(){ rssListener.RssCheck(); }, _settings.rss.interval);
 			return;
 		}
 
@@ -44,7 +49,7 @@ rssListener.RssCheck = d.bind(function(){
 					if (torrents.length > 0)
 						rssListener.emit('newTorrents', torrents); 
 				}
-				retryJob = setTimeout(function(){ rssListener.RssCheck(); }, 1000 * 60 * 60); //schedule re-run in 1 hours
+				retryJobId = setTimeout(function(){ rssListener.RssCheck(); }, _settings.rss.interval);
 			});
 		});
 	});

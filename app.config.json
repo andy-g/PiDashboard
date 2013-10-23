@@ -33,6 +33,7 @@
 	},
 	"rss": {
 		"enableRssListener": true,
+		"interval": 7200000,
 		"rssPaths": [
 			"http://path_to_rss_feed"
 		],

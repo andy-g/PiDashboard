@@ -12,6 +12,11 @@ exports.usageSummary = function(req, res) {
 
 	res.header("Access-Control-Allow-Origin", "*");
 	GetCurrentUsage(function (err, current_usage) {
+		if (!current_usage){
+			res.json(500, {"err" : "Current usage could not be retrieved - check router status."});
+			return;
+		}
+
 		GetUsageHistory(function (err, data) {
 			current_usage.isCurrent = true;
 			data = data.concat(current_usage);
@@ -72,7 +77,6 @@ exports.usageSummary = function(req, res) {
 					usageToday: data.totals[prop].usageToday });
 			}
 			
-			res.type('json');
 			data.output.stats.sort(function(a,b){ 
 				return b.usageToday.total != a.usageToday.total ? b.usageToday.total - a.usageToday.total :	b.usageToDate.total - a.usageToDate.total;
 			});
