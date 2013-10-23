@@ -69,7 +69,7 @@ if (_settings.twitter.enableTwitterBot){
 					{ uri: 'http://checkip.dyndns.com/' },
 					function(err, response, body){
 						if (err){ console.log(err);	} else {
-							twitterBot.SendDirectMessage('My IP Address as at '+ moment().format('HH:mm:ss') +' is ' + body.match(/[0-9]+(?:\.[0-9]+){3}/)[0], data.direct_message.sender_screen_name);
+							twitterBot.SendDirectMessage('My IP Address is ' + body.match(/[0-9]+(?:\.[0-9]+){3}/)[0], data.direct_message.sender_screen_name);
 						}
 					}
 				);
