@@ -1,6 +1,5 @@
 var	http = require('http'),
 	parseString = require('xml2js').parseString,
-	_settings = require('../app.config.json'),
 	events = require("events"),
 	twitterBot = require('./twitterBot'),
 	exec = require('child_process').exec,
@@ -17,14 +16,14 @@ d.on('error', function(er) {
 	
 	//Clear an existing scheduled timeout (if present), and then reschedule
 	clearTimeout(retryJobId);
-	retryJobId = setTimeout(function(){ rssListener.RssCheck(); }, _settings.rss.interval);
+	retryJobId = setTimeout(function(){ rssListener.RssCheck(); }, global.settings.rss.interval);
 });
 
 rssListener.RssCheck = d.bind(function(){
-	http.get(_settings.rss.rssPaths[0], function(res){
+	http.get(global.settings.rss.rssPaths[0], function(res){
 		if (res.statusCode != 200){
 			console.log(new Date().toJSON() + " Error retrieving rss, http statusCode: " + res.statusCode);
-			retryJobId = setTimeout(function(){ rssListener.RssCheck(); }, _settings.rss.interval);
+			retryJobId = setTimeout(function(){ rssListener.RssCheck(); }, global.settings.rss.interval);
 			return;
 		}
 
@@ -49,7 +48,7 @@ rssListener.RssCheck = d.bind(function(){
 					if (torrents.length > 0)
 						rssListener.emit('newTorrents', torrents); 
 				}
-				retryJobId = setTimeout(function(){ rssListener.RssCheck(); }, _settings.rss.interval);
+				retryJobId = setTimeout(function(){ rssListener.RssCheck(); }, global.settings.rss.interval);
 			});
 		});
 	});
@@ -60,7 +59,7 @@ rssListener.AddDownloads = d.bind(function(ids, startDownload){//, callback){
 	exec("sudo service transmission-daemon status", function(error, stdout, stderr){
 		var cmd = '';
 		ids.forEach(function(id){
-			cmd = cmd + " transmission-remote --auth "+ _settings.rss.username +":"+ _settings.rss.password +
+			cmd = cmd + " transmission-remote --auth "+ global.settings.rss.username +":"+ global.settings.rss.password +
 				//(startDownload ? " --no-start-paused" : " --start-paused") +
 				" --no-start-paused" + //Always add the torrent unpaused, queued torrents won't leave the service running though
 				" -a '" + torrentList[id] + "'; ";
@@ -71,6 +70,11 @@ rssListener.AddDownloads = d.bind(function(ids, startDownload){//, callback){
 
 		exec(cmd, function(error, stdout, stderr){
 				console.error(error,stdout,stderr);
+				if (error){
+					rssListener.emit('torrentAdded', { "error": error, "status": false }); 
+					return;
+				}
+				
 				if (stdout.indexOf('duplicate torrent') > -1)
 						error = "duplicate torrent";
 				rssListener.emit('torrentAdded', { "error": error, "status": stdout.match(/responded: \"success\"/gi).length == (ids.length * 2), "ids": ids });

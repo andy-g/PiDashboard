@@ -3,8 +3,9 @@ var	express = require('express'),
 	usage = require('./routes/usage'),
 	https = require('https'),
 	request = require('request'),
-	_settings = require('./app.config.json'),
 	schedule = require('node-schedule');
+
+global.settings = require('./app.config.json');
 
 //Prevent the application from crashing due to any unhandled exceptions
 process.on('uncaughtException', function(err) {
@@ -37,7 +38,7 @@ console.log('Listening on 8080');
 
 //-----start scheduled tasks
 var rule = new schedule.RecurrenceRule();
-rule.hour = _settings.timePeriods.map(function(element){ 
+rule.hour = global.settings.timePeriods.map(function(element){ 
 	return element.endHour % 24; 
 });
 rule.minute = 0;
@@ -57,7 +58,7 @@ var j = schedule.scheduleJob('network usage log',rule, function(){
 console.log(new Date().toJSON() + ' Scheduled job started for time periods (hours of day): ' + rule.hour);
 
 //-----listen for direct messages
-if (_settings.twitter.enableTwitterBot){
+if (global.settings.twitter.enableTwitterBot){
 	var twitterBot = require('./routes/twitterBot');
 	twitterBot.on('tweet',function(data){
 		if (data.direct_message && data.direct_message.sender_screen_name != 'PiTweetBot'){
@@ -76,7 +77,7 @@ if (_settings.twitter.enableTwitterBot){
 			} 
 
 			//--Queue or Dowload Torrent(s)
-			else if (_settings.rss.enableRssListener && /DL #|QUEUE #/i.test(data.direct_message.text)) {
+			else if (global.settings.rss.enableRssListener && /DL #|QUEUE #/i.test(data.direct_message.text)) {
 				rssListener.AddDownloads(data.direct_message.text.match(/#[0-9]+/gi).map(function(num){ return num.replace(/#/,'') }), /DL #/i.test(data.direct_message.text));
 			}
 		}
@@ -86,7 +87,7 @@ if (_settings.twitter.enableTwitterBot){
 
 //-----listen for rss
 var rssListener;
-if (_settings.rss.enableRssListener){
+if (global.settings.rss.enableRssListener){
 	rssListener = require('./routes/rssListener');
 	rssListener.on('newTorrents',function(data){
 		console.log(new Date().toJSON() + " New torrent event");
@@ -95,7 +96,10 @@ if (_settings.rss.enableRssListener){
 				return prev + " " + curr.title + " (" + (curr.size / 1024 / 1024).toFixed(2) + "MB),";
 			}, "").slice(0,-1)
 		);
-		rssListener.AddDownloads(data.map(function(element){ return element.id; }), false);
+		rssListener.AddDownloads(
+			data.map(function(element){ return element.id; }), 
+			(!!global.settings.services.transmission.jobs && global.settings.services.transmission.jobs[1].nextInvocation() < global.settings.services.transmission.jobs[0].nextInvocation()) ? true : false
+		);
 	});
 	rssListener.on('torrentAdded',function(data){
 		if (data.status){

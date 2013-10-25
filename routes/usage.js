@@ -2,7 +2,6 @@ var request = require('request'),
 	exec = require('child_process').exec,
 	fs = require('fs'),
 	formatHelper = require('./formatHelper'),
-	_settings = require('../app.config.json'),
 	schedule = require('node-schedule');
 
 
@@ -28,7 +27,7 @@ exports.usageSummary = function(req, res) {
 			//process each period
 			data.reduce(function(previousValue, currentValue, index, array){
 		  		var periodUsage = 0;
-		  		var jobPeriod = _settings.timePeriods.filter(function (element, index, array) {  
+				var jobPeriod = global.settings.timePeriods.filter(function (element, index, array) {  
 						return currentValue.isCurrent ? 
 							element.endHour > (new Date(currentValue.date)).getHours() :
 							element.endHour >= (new Date(currentValue.date)).getHours();
@@ -111,7 +110,7 @@ exports.drives = function(req, res) {
 exports.serviceStatus = function(req, res) {
 	res.header("Access-Control-Allow-Origin", "*");
 
-	var service = _settings.services[req.param('service')];
+	var service = global.settings.services[req.param('service')];
 
 	//If service isn't in config then exit 
 	if (!service){
@@ -176,7 +175,7 @@ function ExecService(serviceName, status, callback){
 }
 
 function GetUsageHistory(callback){
-	fs.readFile(_settings.usageHistoryPath, function (err, data) {
+	fs.readFile(global.settings.usageHistoryPath, function (err, data) {
 		var usage_history = (!data || data.length == 0) ? new Array() : JSON.parse(data);
 		callback(undefined, usage_history);
 	});
@@ -185,7 +184,7 @@ function GetUsageHistory(callback){
 function GetCurrentUsage(callback){
 	var current_usage = { "date": Date.now(), "stats": new Array() };
 	request(
-		{uri: _settings.routerStatsUri, strictSSL: false},
+		{uri: global.settings.routerStatsUri, strictSSL: false},
 		function(err, response, body){
 			if (err){
 				callback( { msg: "GetCurrentUsage: No response body.", "error": err } );
@@ -194,7 +193,7 @@ function GetCurrentUsage(callback){
 				var ip_row_collection = body.match(/"(?:[0-9]{1,3}\.){3}[0-9]{1,3}.*(?=,)/gi);
 				for (i = 0; i < ip_row_collection.length; i++){
 					var row_array = ip_row_collection[i].replace(/(\s|")/g,'').split(',');
-					current_usage.stats[i] = {"ip_add" : row_array[0], "mac_add" : row_array[1], "device_name" : (_settings.namedDevices[row_array[0]] || "unknown"), "total_bytes" : parseInt(row_array[3]) };
+					current_usage.stats[i] = {"ip_add" : row_array[0], "mac_add" : row_array[1], "device_name" : (global.settings.namedDevices[row_array[0]] || "unknown"), "total_bytes" : parseInt(row_array[3]) };
 				}
 				callback(err, current_usage);
 			}
@@ -211,14 +210,14 @@ function SaveUsageHistory(currentUsage, callback){
 			if (_date.getDate() == 1 && _date.getHours() == 0){
 				_date.setDate(_date.getDate()-1); //Move date back 1 day to determine previous month details
 				fs.renameSync(
-					_settings.usageHistoryPath, 
-					_settings.usageHistoryPath.replace(".json","_" + _date.getFullYear() + formatHelper.padNumber(_date.getMonth() + 1, 2) + ".json")
+					global.settings.usageHistoryPath, 
+					global.settings.usageHistoryPath.replace(".json","_" + _date.getFullYear() + formatHelper.padNumber(_date.getMonth() + 1, 2) + ".json")
 				);
 				//Reset data for the new month
 				data = new Array();
 			}
 
-			fs.writeFile(_settings.usageHistoryPath, JSON.stringify(data.concat(currentUsage), null, "\t"), function(err) {
+			fs.writeFile(global.settings.usageHistoryPath, JSON.stringify(data.concat(currentUsage), null, "\t"), function(err) {
 				callback( {"message" : "usage data saved successfully."} );
 			});
 

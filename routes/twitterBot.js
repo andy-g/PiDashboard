@@ -1,6 +1,4 @@
-var 
-	_settings = require('../app.config.json'),
-	twitter = require('twitter'),
+var twitter = require('twitter'),
 	events = require("events"),
 	domain = require('domain');
 
@@ -11,7 +9,7 @@ d.on('error', function(er) {
 	twitterBot.emit('error', er);
 });
 
-var twit = new twitter(_settings.twitter.keys);
+var twit = new twitter(global.settings.twitter.keys);
 var streamRetryJob = null;
 var twitterBot = new events.EventEmitter();
 twitterBot.SendDirectMessage = d.bind(function(message, recipient, callback){
@@ -20,7 +18,7 @@ twitterBot.SendDirectMessage = d.bind(function(message, recipient, callback){
 		recipient = null;
 	}
 	if (!recipient)
-		recipient = _settings.twitter.defaultRecipient;
+		recipient = global.settings.twitter.defaultRecipient;
 		
 	message = message.substr(0,140);
 	twit.newDirectMessage(recipient, message, function(data) { 
