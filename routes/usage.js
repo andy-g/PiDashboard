@@ -34,30 +34,30 @@ exports.usageSummary = function(req, res) {
 		  			}).sort(function(a,b){ return a.endHour - b.endHour; })[0];
 				var periodDate = new Date(currentValue.date);
 
-				//process each ip address for period
+				//process each mac address for period
 		  		currentValue.stats.reduce(function(previousValue, currentValue, index, array){
-		  			if (!data.totals[currentValue.ip_add])
-		  				data.totals[currentValue.ip_add] = { usageToDate: { total: 0 }, usageToday: { total: 0 }, lastTotal: 0 };
+					if (!data.totals[currentValue.mac_add])
+						data.totals[currentValue.mac_add] = { usageToDate: { total: 0 }, usageToday: { total: 0 }, lastTotal: 0 };
 
-		  			data.totals[currentValue.ip_add].mac_add = currentValue.mac_add;
-		  			data.totals[currentValue.ip_add].device_name = currentValue.device_name;
+					data.totals[currentValue.mac_add].ip_add = currentValue.ip_add;
+					data.totals[currentValue.mac_add].device_name = currentValue.device_name;
 
 					//If we're starting a new month, period usage should be forced to 0
 					if (periodDate.getDate() != 1 || periodDate.getHours() != 0){
-						periodUsage = parseInt(currentValue.total_bytes) - (data.totals[currentValue.ip_add].lastTotal || 0);
+						periodUsage = parseInt(currentValue.total_bytes) - (data.totals[currentValue.mac_add].lastTotal || 0);
 						if (periodUsage < 0) { //if periodUsage is < 0, router must have been reset in the period, so just use the Total usage as a period usage
 							periodUsage = parseInt(currentValue.total_bytes);
 						}
 		  			}
 
-		  			data.totals[currentValue.ip_add].usageToDate[jobPeriod.name] = (data.totals[currentValue.ip_add].usageToDate[jobPeriod.name] || 0) + periodUsage;
-		  			data.totals[currentValue.ip_add].usageToDate.total = data.totals[currentValue.ip_add].usageToDate.total + periodUsage;
-		  			data.totals[currentValue.ip_add].lastTotal = parseInt(currentValue.total_bytes);
+					data.totals[currentValue.mac_add].usageToDate[jobPeriod.name] = (data.totals[currentValue.mac_add].usageToDate[jobPeriod.name] || 0) + periodUsage;
+					data.totals[currentValue.mac_add].usageToDate.total = data.totals[currentValue.mac_add].usageToDate.total + periodUsage;
+					data.totals[currentValue.mac_add].lastTotal = parseInt(currentValue.total_bytes);
 
 					//Get Today's (runDate) usage (only include if period date is after 00:01 - allow 1 minute delay in midnight run running)
 					if (periodDate > new Date(runDate).setHours(0,1,0,0) && periodDate <= new Date(new Date(runDate).setDate(runDate.getDate()+1)).setHours(0,1,0,0)){
-		  				data.totals[currentValue.ip_add].usageToday[jobPeriod.name] = (data.totals[currentValue.ip_add].usageToday[jobPeriod.name] || 0) + periodUsage;
-		  				data.totals[currentValue.ip_add].usageToday.total = data.totals[currentValue.ip_add].usageToday.total + periodUsage;
+						data.totals[currentValue.mac_add].usageToday[jobPeriod.name] = (data.totals[currentValue.mac_add].usageToday[jobPeriod.name] || 0) + periodUsage;
+						data.totals[currentValue.mac_add].usageToday.total = data.totals[currentValue.mac_add].usageToday.total + periodUsage;
 		  			}
 		  		},0);
 			},0);
@@ -67,8 +67,8 @@ exports.usageSummary = function(req, res) {
 			for (var prop in data.totals) {
 				delete data.totals[prop].lastTotal;
 				data.output.stats.push({
-					"ip_add": prop, 
-					"mac_add": data.totals[prop].mac_add, 
+					"mac_add": prop, 
+					"ip_add": data.totals[prop].ip_add, 
 					"device_name": data.totals[prop].device_name, 
 					"total_bytes": data.totals[prop].usageToDate.total,	//include for backwards compatibility
 					"today_bytes": data.totals[prop].usageToday.total,	//include for backwards compatibility
@@ -190,10 +190,10 @@ function GetCurrentUsage(callback){
 				callback( { msg: "GetCurrentUsage: No response body.", "error": err } );
 			} else {
 				//Iterate through current usage stats for each device
-				var ip_row_collection = body.match(/"(?:[0-9]{1,3}\.){3}[0-9]{1,3}.*(?=,)/gi);
-				for (i = 0; i < ip_row_collection.length; i++){
-					var row_array = ip_row_collection[i].replace(/(\s|")/g,'').split(',');
-					current_usage.stats[i] = {"ip_add" : row_array[0], "mac_add" : row_array[1], "device_name" : (global.settings.namedDevices[row_array[0]] || "unknown"), "total_bytes" : parseInt(row_array[3]) };
+				var mac_row_collection = body.match(/"(?:[0-9]{1,3}\.){3}[0-9]{1,3}.*(?=,)/gi);
+				for (i = 0; i < mac_row_collection.length; i++){
+					var row_array = mac_row_collection[i].replace(/(\s|")/g,'').split(',');
+					current_usage.stats[i] = {"ip_add" : row_array[0], "mac_add" : row_array[1], "device_name" : (global.settings.namedDevices[row_array[1]] || "unknown"), "total_bytes" : parseInt(row_array[3]) };
 				}
 				callback(err, current_usage);
 			}
