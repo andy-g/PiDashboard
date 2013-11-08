@@ -25,42 +25,56 @@ exports.usageSummary = function(req, res) {
 			data.totals = {};
 
 			//process each period
-			data.reduce(function(previousValue, currentValue, index, array){
+			data.forEach(function(currentPeriod){
 		  		var periodUsage = 0;
 				var jobPeriod = global.settings.timePeriods.filter(function (element, index, array) {  
-						return currentValue.isCurrent ? 
-							element.endHour > (new Date(currentValue.date)).getHours() :
-							element.endHour >= (new Date(currentValue.date)).getHours();
+						return currentPeriod.isCurrent ? 
+							element.endHour > (new Date(currentPeriod.date)).getHours() :
+							element.endHour >= (new Date(currentPeriod.date)).getHours();
 		  			}).sort(function(a,b){ return a.endHour - b.endHour; })[0];
-				var periodDate = new Date(currentValue.date);
+				var periodDate = new Date(currentPeriod.date);
+
+				//group stats by device (some devices are duplicated for distinct IP's e.g. VPN)
+				var periodStatsGrouped = {};
+				currentPeriod.stats.forEach(function(device){
+					if (!periodStatsGrouped[device.mac_add]) {
+						periodStatsGrouped[device.mac_add] = {};
+						periodStatsGrouped[device.mac_add].ip_add = device.ip_add;
+						periodStatsGrouped[device.mac_add].device_name = device.device_name;
+						periodStatsGrouped[device.mac_add].total_bytes = device.total_bytes;
+					} else
+						periodStatsGrouped[device.mac_add].total_bytes += device.total_bytes;
+				})
 
 				//process each mac address for period
-		  		currentValue.stats.reduce(function(previousValue, currentValue, index, array){
-					if (!data.totals[currentValue.mac_add])
-						data.totals[currentValue.mac_add] = { usageToDate: { total: 0 }, usageToday: { total: 0 }, lastTotal: 0 };
+				for (var mac_add in periodStatsGrouped) {
+					var currentDevice = periodStatsGrouped[mac_add];
+					
+					if (!data.totals[mac_add])
+						data.totals[mac_add] = { usageToDate: { total: 0 }, usageToday: { total: 0 }, lastTotal: 0 };
 
-					data.totals[currentValue.mac_add].ip_add = currentValue.ip_add;
-					data.totals[currentValue.mac_add].device_name = currentValue.device_name;
+					data.totals[mac_add].ip_add = currentDevice.ip_add;
+					data.totals[mac_add].device_name = currentDevice.device_name;
 
 					//If we're starting a new month, period usage should be forced to 0
 					if (periodDate.getDate() != 1 || periodDate.getHours() != 0){
-						periodUsage = parseInt(currentValue.total_bytes) - (data.totals[currentValue.mac_add].lastTotal || 0);
+						periodUsage = parseInt(currentDevice.total_bytes) - (data.totals[mac_add].lastTotal || 0);
 						if (periodUsage < 0) { //if periodUsage is < 0, router must have been reset in the period, so just use the Total usage as a period usage
-							periodUsage = parseInt(currentValue.total_bytes);
+							periodUsage = parseInt(currentDevice.total_bytes);
 						}
 		  			}
 
-					data.totals[currentValue.mac_add].usageToDate[jobPeriod.name] = (data.totals[currentValue.mac_add].usageToDate[jobPeriod.name] || 0) + periodUsage;
-					data.totals[currentValue.mac_add].usageToDate.total = data.totals[currentValue.mac_add].usageToDate.total + periodUsage;
-					data.totals[currentValue.mac_add].lastTotal = parseInt(currentValue.total_bytes);
+					data.totals[mac_add].usageToDate[jobPeriod.name] = (data.totals[mac_add].usageToDate[jobPeriod.name] || 0) + periodUsage;
+					data.totals[mac_add].usageToDate.total = data.totals[mac_add].usageToDate.total + periodUsage;
+					data.totals[mac_add].lastTotal = parseInt(currentDevice.total_bytes);
 
 					//Get Today's (runDate) usage (only include if period date is after 00:01 - allow 1 minute delay in midnight run running)
 					if (periodDate > new Date(runDate).setHours(0,1,0,0) && periodDate <= new Date(new Date(runDate).setDate(runDate.getDate()+1)).setHours(0,1,0,0)){
-						data.totals[currentValue.mac_add].usageToday[jobPeriod.name] = (data.totals[currentValue.mac_add].usageToday[jobPeriod.name] || 0) + periodUsage;
-						data.totals[currentValue.mac_add].usageToday.total = data.totals[currentValue.mac_add].usageToday.total + periodUsage;
+						data.totals[mac_add].usageToday[jobPeriod.name] = (data.totals[mac_add].usageToday[jobPeriod.name] || 0) + periodUsage;
+						data.totals[mac_add].usageToday.total = data.totals[mac_add].usageToday.total + periodUsage;
 		  			}
-		  		},0);
-			},0);
+				}
+			});
 
 			//enrich and format
 			data.output = { date: Date.parse(runDate), stats: [] };
