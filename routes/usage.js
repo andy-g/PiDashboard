@@ -50,11 +50,12 @@ exports.usageSummary = function(req, res) {
 				for (var mac_add in periodStatsGrouped) {
 					var currentDevice = periodStatsGrouped[mac_add];
 					
-					if (!data.totals[mac_add])
+					if (!data.totals[mac_add]) {
 						data.totals[mac_add] = { usageToDate: { total: 0 }, usageToday: { total: 0 }, lastTotal: 0 };
-
+						data.totals[mac_add].device_name = global.settings.namedDevices[mac_add] || "unknown";
 					data.totals[mac_add].ip_add = currentDevice.ip_add;
-					data.totals[mac_add].device_name = currentDevice.device_name;
+					}
+					
 
 					//If we're starting a new month, period usage should be forced to 0
 					if (periodDate.getDate() != 1 || periodDate.getHours() != 0){
@@ -63,6 +64,12 @@ exports.usageSummary = function(req, res) {
 							periodUsage = parseInt(currentDevice.total_bytes);
 						}
 		  			}
+
+					if (periodUsage == 0)
+						continue;
+
+					//Return latest IP Address
+					data.totals[mac_add].ip_add = currentDevice.ip_add; 
 
 					data.totals[mac_add].usageToDate[jobPeriod.name] = (data.totals[mac_add].usageToDate[jobPeriod.name] || 0) + periodUsage;
 					data.totals[mac_add].usageToDate.total = data.totals[mac_add].usageToDate.total + periodUsage;

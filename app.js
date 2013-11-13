@@ -1,7 +1,6 @@
 var	express = require('express'),
 	fs = require('fs'),
 	usage = require('./routes/usage'),
-	https = require('https'),
 	request = require('request'),
 	schedule = require('node-schedule');
 
@@ -12,11 +11,6 @@ process.on('uncaughtException', function(err) {
 	console.error(new Date().toJSON() + ' unhandled exception!', err);
 	console.log(err.stack);
 });
-
-var options = {
-	key: fs.readFileSync('keys/server-key.pem'),
-	cert: fs.readFileSync('keys/server-cert.pem')
-};
 
 var app = express();
 app.use(express.cookieParser());
@@ -31,9 +25,14 @@ app.get('/drives', usage.drives);
 app.get('/services/:service?/:status?', usage.serviceStatus);
 app.put('/services/:service?/:status?', usage.serviceStatus);
 
-//-----start server (comment out https and use app.listen line if you don't have https keys in the keys folder)-----
-//app.listen(8080);
-https.createServer(options, app).listen(8080);//(443);
+//-----start server (comment out app.listen and uncomment previous lines to use https)-----
+//https = require('https');
+// var options = {
+// 	key: fs.readFileSync('keys/server-key.pem'),
+// 	cert: fs.readFileSync('keys/server-cert.pem')
+// };
+//https.createServer(options, app).listen(8080);//(443);
+app.listen(8080);
 console.log('Listening on 8080');
 
 //-----start scheduled tasks
