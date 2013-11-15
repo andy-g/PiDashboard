@@ -8,6 +8,7 @@ body {
 	margin: 10px 0px 10px;
   line-height: 20px;
   color: #333333;
+  max-width: 366px;
 }
 
 h1 {
@@ -70,7 +71,7 @@ td {
     border-bottom: 1px dashed #CCC;
 }
 #table tr:last-of-type  td{
-    border-bottom: none;
+  border-bottom: none;
 	font-weight: bold;
 }
 
@@ -80,10 +81,9 @@ body{
 	
 }
 #table {
-	display:none;
-    border-collapse: collapse;
-	/*width: 100%;*/
-	/*width:280px;*/
+  display:none;
+  border-collapse: collapse;
+  width: 100%;
 }
 
 #table td:first-of-type{
@@ -312,7 +312,7 @@ group>.btn.active {
 }
 
 .btn-group {
-  position: relative;
+  float: right;
   display: inline-block;
   font-size: 0;
   vertical-align: middle;
