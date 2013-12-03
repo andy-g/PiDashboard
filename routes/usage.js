@@ -65,6 +65,9 @@ exports.usageSummary = function(req, res) {
 						}
 		  			}
 
+					//Need to record this even if periodUsage = 0, otherwise opening balance is ignored and included in the next period usage
+					data.totals[mac_add].lastTotal = parseInt(currentDevice.total_bytes);
+
 					if (periodUsage == 0)
 						continue;
 
@@ -73,7 +76,6 @@ exports.usageSummary = function(req, res) {
 
 					data.totals[mac_add].usageToDate[jobPeriod.name] = (data.totals[mac_add].usageToDate[jobPeriod.name] || 0) + periodUsage;
 					data.totals[mac_add].usageToDate.total = data.totals[mac_add].usageToDate.total + periodUsage;
-					data.totals[mac_add].lastTotal = parseInt(currentDevice.total_bytes);
 
 					//Get Today's (runDate) usage (only include if period date is after 00:01 - allow 1 minute delay in midnight run running)
 					if (periodDate > new Date(runDate).setHours(0,1,0,0) && periodDate <= new Date(new Date(runDate).setDate(runDate.getDate()+1)).setHours(0,1,0,0)){
