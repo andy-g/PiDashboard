@@ -6,9 +6,9 @@ exports.formatBytes = function(bytes, precision)
     pwr = Math.min(pwr, units.length - 1);
     bytes /= Math.pow(1024, pwr);
 	return bytes.toFixed(precision) + ' ' + units[pwr];
-}
+};
 
 exports.padNumber = function(number, pad) {
 	var N = Math.pow(10, pad);
-	return number < N ? ("" + (N + number)).slice(1) : "" + number
-}
+	return number < N ? ("" + (N + number)).slice(1) : "" + number;
+};

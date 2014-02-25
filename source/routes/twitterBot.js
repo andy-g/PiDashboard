@@ -16,10 +16,10 @@ d.on('error', function(er) {
 var twit = new twitter(global.settings.twitter.keys);
 var streamRetryJob = null;
 var twitterBot = new events.EventEmitter();
-// function twitterBot () {
-// 	EventEmitter.call(this);
-// }
-// util.inherits(twitterBot, EventEmitter);
+//function twitterBot () {
+//	EventEmitter.call(this);
+//}
+//util.inherits(twitterBot, EventEmitter);
 
 //twitterBot.prototype.SendDirectMessage = d.bind(function(message, recipient, callback){
 twitterBot.SendDirectMessage = d.bind(function(message, recipient, callback){

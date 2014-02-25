@@ -5,7 +5,7 @@
  */
 
 body {
-	margin: 10px 0px 10px;
+	margin: 10px 0 10px;
   line-height: 20px;
   color: #333333;
   max-width: 366px;
@@ -30,6 +30,8 @@ label {
 form {
   /*width: 563px;*/
   -webkit-transition: -webkit-transform 0.25s ease;
+  -moz-transition: -moz-transform 0.25s ease;
+  -o-transition: -o-transform 0.25s ease;
 }
 
 .overlay {
@@ -42,12 +44,19 @@ form {
   padding: 20px;
   margin: -40px 0 0 -270px;
   opacity: 0;
+  background: #000;
   background: rgba(0, 0, 0, 0.75);
   border-radius: 5px;
   color: #FFF;
   font: 1.5em/1.2 Helvetica Neue, sans-serif;
   -webkit-transition: all 1.0s ease;
+  -moz-transition: all 1.0s ease;
+  -o-transition: all 1.0s ease;
   -webkit-transform: scale(0);
+  -moz-transform: scale(0);
+  -o-transform: scale(0);
+  -ms-transform: scale(0);
+  transform: scale(0);
 }
 
 .overlay a {
@@ -57,6 +66,10 @@ form {
 .overlay.visible {
   opacity: 1;
   -webkit-transform: scale(1);
+  -moz-transform: scale(1);
+  -o-transform: scale(1);
+  -ms-transform: scale(1);
+  transform: scale(1);    
 }
 
 /*-----*/
@@ -70,7 +83,7 @@ form {
 td {
     border-bottom: 1px dashed #CCC;
 }
-#table tr:last-of-type  td{
+.table tr:last-of-type  td{
   border-bottom: none;
 	font-weight: bold;
 }
@@ -80,26 +93,26 @@ body{
 	font-size: 11px;
 	
 }
-#table {
+.table {
   display:none;
   border-collapse: collapse;
   width: 100%;
 }
 
-#table td:first-of-type{
+.table td:first-of-type{
 	width: 120px;
 }
 
-#table td:nth-of-type(2){
+.table td:nth-of-type(2){
 	width: 80px;
 }
 
-#table th{
+.table th{
 	text-align:left;;
 }
 
 /*#table td span {*/
-#table td .hover {
+.table td .hover {
 	position: relative;
 	left: 1px;
 	/*left: 4px;
@@ -164,28 +177,28 @@ tr {
 
 body{
 	width:100%;
-	padding:0px;
+	padding:0;
 }
 
-#usage {
+.container section {
 	line-height: 12px;
 }
 
 /** iPhone specific css **/
-#table td .details {
+.table td .details {
 	display:none;
 }
 
 @media screen and (orientation:landscape) {
-	#table td:first-of-type{
+	.table td:first-of-type{
 		width: 200px;
 	}
 
-	#table td .hover {
+	.table td .hover {
 		display:none;
 	}
 
-	#table td .details {
+	.table td .details {
 		display:inline;
 		color: #AAA;
 		padding-left: 5px;
@@ -322,8 +335,11 @@ group>.btn.active {
 button {
   display: block;
   border-radius: 2px;
-  box-shadow: 0px 1px 3px rgba(0, 0, 0, 0.1);
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
   -webkit-user-select: none;
+  -moz-user-select: none;
+  -ms-user-select: none;
+  user-select: none;
   background: -webkit-linear-gradient(#FAFAFA, #F4F4F4 40%, #E5E5E5);
   border: 1px solid #AAA;
   color: #444;
@@ -396,7 +412,7 @@ button {
   display: inline-block;
   width: 14px;
   height: 14px;
-  margin-top: 0px;
+  margin-top: 0;
   /*line-height: 14px;*/
   vertical-align: text-top;
   background-image: url("glyphicons-halflings.png");

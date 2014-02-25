@@ -51,9 +51,9 @@ rssListener.prototype.RssCheck = d.bind(function(){
 							console.log(new Date().toJSON() + " Ignoring old torrent: "+ torrent.title +"' ("+ (torrent['torrent:contentLength'] / 1024 / 1024).toFixed(2) +"MB)" );	
 						else {
 							torrentList.push(torrent.enclosure[0].$.url);
-							torrents.push({ "title": torrent.title, "size": torrent['torrent:contentLength'], "id": torrentList.length -1 })
+							torrents.push({ "title": torrent.title, "size": torrent['torrent:contentLength'], "id": torrentList.length -1 });
 						}
-					})
+					});
 					if (torrents.length > 0)
 						instance.emit('newTorrents', torrents); 
 				}
@@ -73,7 +73,7 @@ rssListener.prototype.AddDownloads = d.bind(function(ids, startDownload){//, cal
 				//(startDownload ? " --no-start-paused" : " --start-paused") +
 				" --no-start-paused" + //Always add the torrent unpaused, queued torrents won't leave the service running though
 				" -a '" + torrentList[id] + "'; ";
-		})
+		});
 		
 		if (stdout.indexOf("is running") == -1)
 			cmd = "sudo service transmission-daemon start; "+ cmd + (startDownload ? "" : "sudo service transmission-daemon stop");

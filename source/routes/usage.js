@@ -45,7 +45,7 @@ exports.usageSummary = function(req, res) {
 						periodStatsGrouped[device.mac_add].total_bytes = device.total_bytes;
 					} else
 						periodStatsGrouped[device.mac_add].total_bytes += device.total_bytes;
-				})
+				});
 
 				//process each mac address for period
 				for (var mac_add in periodStatsGrouped) {
@@ -59,7 +59,7 @@ exports.usageSummary = function(req, res) {
 					
 			
 					//If we're starting a new month, period usage should be forced to 0
-					if (periodDate.getDate() != 1 || periodDate.getHours() != 0){
+					if (periodDate.getDate() != 1 || periodDate.getHours() !== 0){
 						periodUsage = parseInt(currentDevice.total_bytes) - (data.totals[mac_add].lastTotal || 0);
 						if (periodUsage < 0) { //if periodUsage is < 0, router must have been reset in the period, so just use the Total usage as a period usage
 							periodUsage = parseInt(currentDevice.total_bytes);
@@ -69,7 +69,7 @@ exports.usageSummary = function(req, res) {
 					//Need to record this even if periodUsage = 0, otherwise opening balance is ignored and included in the next period usage
 					data.totals[mac_add].lastTotal = parseInt(currentDevice.total_bytes);
 
-					if (periodUsage == 0)
+					if (periodUsage === 0)
 						continue;
 
 					//Return latest IP Address
@@ -104,7 +104,7 @@ exports.usageSummary = function(req, res) {
 				return b.usageToday.total != a.usageToday.total ? b.usageToday.total - a.usageToday.total :	b.usageToDate.total - a.usageToDate.total;
 			});
 			data.output.stats = data.output.stats.filter(function(element, index, array){ 
-				return element.usageToDate.total != 0;	
+				return element.usageToDate.total !== 0;	
 			});
 			res.json(data.output);
 
@@ -118,20 +118,20 @@ exports.usageSummary = function(req, res) {
 
 
 exports.drives = function(req, res) {
-   	res.header("Access-Control-Allow-Origin", "*");
+	res.header("Access-Control-Allow-Origin", "*");
 	res.json({"date": 1377848728838,"drives": [{"mount": "/","size": "7.3G","avail": "5.7G","used": "18%"},{"mount": "/boot","size": "69M","avail": "63M","used": "9%"},{"mount": "/media/video","size": "466G","avail": "16G","used": "97%"},{"mount": "/media/timemachine","size": "466G","avail": "101G","used": "79%"}]});
 	/*
 	exec("df -h", function(error, stdout, stderr){
 		if (error !== null) {
-				console.log('exec error: ' + error);
+			console.log('exec error: ' + error);
+			res.json(500, {"err" : "Disk usage could not be retrieved."});
+		}
+			GetDriveUsage(stdout, function(err, drive_usage){
+				if (err) {
 				res.json(500, {"err" : "Disk usage could not be retrieved."});
-	    	}
-   			GetDriveUsage(stdout, function(err, drive_usage){
-   				if (err) {
-					res.json(500, {"err" : "Disk usage could not be retrieved."});
-	    		} else	
-    				res.json(drive_usage);
-	    	})
+			} else	
+				res.json(drive_usage);
+		})
 	});
 	*/
 };
@@ -194,9 +194,9 @@ function ExecService(serviceName, status, callback){
 				if (callback)
 					callback({"err" : "Service status could not be " + (status == "start" ? "started" : "stopped") +"."});
 				return;
-		    }
+			}
 
-		    //If we're setting the status, just return what we've set it to (return can come back before service status is changed), otherwise verify output to determine service status
+			//If we're setting the status, just return what we've set it to (return can come back before service status is changed), otherwise verify output to determine service status
 			if (callback)
 				callback({ service: serviceName, status: (status == "status" ? (stdout.indexOf(serviceName + " is running") > -1) : (status == "start")) });
 		});
@@ -205,13 +205,13 @@ function ExecService(serviceName, status, callback){
 
 function GetUsageHistory(callback){
 	fs.readFile(global.settings.usageHistoryPath, function (err, data) {
-		var usage_history = (!data || data.length == 0) ? new Array() : JSON.parse(data);
+		var usage_history = (!data || data.length === 0) ? [] : JSON.parse(data);
 		callback(undefined, usage_history);
 	});
-};
+}
 
 function GetCurrentUsage(callback){
-	var current_usage = { "date": Date.now(), "stats": new Array() };
+	var current_usage = { "date": Date.now(), "stats": [] };
 	request(
 		{uri: 'http://localhost:8080/RouterStats.htm', strictSSL: false},
 		function(err, response, body){
@@ -228,7 +228,7 @@ function GetCurrentUsage(callback){
 			}
 		}
 	);
-};
+}
 exports.GetCurrentUsage = GetCurrentUsage;
 
 function SaveUsageHistory(currentUsage, callback){
@@ -236,14 +236,14 @@ function SaveUsageHistory(currentUsage, callback){
 		if (data){
 			//If it's the first day of the month, backup the current file with a _YYYYMM suffix, eg: usage_history_201306.json
 			var _date = new Date(currentUsage.date);
-			if (_date.getDate() == 1 && _date.getHours() == 0){
+			if (_date.getDate() == 1 && _date.getHours() === 0){
 				_date.setDate(_date.getDate()-1); //Move date back 1 day to determine previous month details
 				fs.renameSync(
 					global.settings.usageHistoryPath, 
 					global.settings.usageHistoryPath.replace(".json","_" + _date.getFullYear() + formatHelper.padNumber(_date.getMonth() + 1, 2) + ".json")
 				);
 				//Reset data for the new month
-				data = new Array();
+				data = [];
 			}
 
 			fs.writeFile(global.settings.usageHistoryPath, JSON.stringify(data.concat(currentUsage), null, "\t"), function(err) {
@@ -260,9 +260,9 @@ function SaveUsageHistory(currentUsage, callback){
 exports.SaveUsageHistory = SaveUsageHistory;
 
 function GetDriveUsage(stdout, callback) {
-	var drive_usage = { "date": Date.now(), "drives": new Array() };
+	var drive_usage = { "date": Date.now(), "drives": [] };
 	var drives = stdout.match(/\/dev.*/gi);
-	if (drives == null){
+	if (drives === null){
 		callback("Drive usage could not be retrieved.", undefined);	
 		return;
 	}

@@ -27,10 +27,10 @@ app.put('/services/:service?/:status?', usage.serviceStatus);
 
 //-----start server (comment out app.listen and uncomment previous lines to use https)-----
 //https = require('https');
-// var options = {
-// 	key: fs.readFileSync('keys/server-key.pem'),
-// 	cert: fs.readFileSync('keys/server-cert.pem')
-// };
+//var options = {
+//	key: fs.readFileSync('keys/server-key.pem'),
+//	cert: fs.readFileSync('keys/server-cert.pem')
+//};
 //https.createServer(options, app).listen(8080);//(443);
 app.listen(8080);
 console.log('Listening on 8080');
@@ -43,7 +43,7 @@ rule.hour = global.settings.timePeriods.map(function(element){
 rule.minute = 0;
 
 var j = schedule.scheduleJob('network usage log',rule, function(){
-	console.log(new Date().toJSON() + " Scheduled Job Starting: ")
+	console.log(new Date().toJSON() + " Scheduled Job Starting: ");
 	usage.GetCurrentUsage(function(err, current_usage){
 		if (err) { 
 			console.log(new Date().toJSON() + " save error: " + JSON.stringify(err));
@@ -79,10 +79,10 @@ if (global.settings.twitter.enableTwitterBot){
 
 			//--Queue or Dowload Torrent(s)
 			else if (global.settings.rss.enableRssListener && /DL #|QUEUE #/i.test(data.direct_message.text)) {
-				rssListener.AddDownloads(data.direct_message.text.match(/#[0-9]+/gi).map(function(num){ return num.replace(/#/,'') }), /DL #/i.test(data.direct_message.text));
+				rssListener.AddDownloads(data.direct_message.text.match(/#[0-9]+/gi).map(function(num){ return num.replace(/#/,''); }), /DL #/i.test(data.direct_message.text));
 			}
 		}
-	})
+	});
 	twitterBot.StartTwitterListener();
 }
 

@@ -14,14 +14,14 @@
           require: true
         },
       },
-      main: ['gruntfile.js', 'test/**/*.js']
+      main: ['gruntfile.js', 'test/**/*.js', 'source/public/resources/PiDashboard.js', 'source/app.js', 'source/routes/*.js']
     });
 
     grunt.config('csslint', {
       options: {
         'adjoining-classes': false
       },
-      main: ['css/main.css']
+      main: ['css/main.css']//,'source/**/*.css']
     });
 
     grunt.config('nodeunit', {
