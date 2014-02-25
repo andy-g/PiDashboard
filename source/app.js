@@ -59,6 +59,8 @@ console.log(new Date().toJSON() + ' Scheduled job started for time periods (hour
 //-----listen for direct messages
 if (global.settings.twitter.enableTwitterBot){
 	var twitterBot = require('./routes/twitterBot');
+	//var twitterBot = new TwitterBot();
+
 	twitterBot.on('tweet',function(data){
 		if (data.direct_message && data.direct_message.sender_screen_name != 'PiTweetBot'){
 			console.log(new Date().toJSON() + ' new tweet event handler: ' + data.direct_message.text);
@@ -87,14 +89,18 @@ if (global.settings.twitter.enableTwitterBot){
 //-----listen for rss
 var rssListener;
 if (global.settings.rss.enableRssListener){
-	rssListener = require('./routes/rssListener');
+	RssListener = require('./routes/rssListener');
+	var rssListener = new RssListener();
+
 	rssListener.on('newTorrents',function(data){
 		console.log(new Date().toJSON() + " New torrent event");
-		twitterBot.SendDirectMessage("Adding" +
-			data.reduce(function(prev, curr){ 
-				return prev + " " + curr.title + " (" + (curr.size / 1024 / 1024).toFixed(2) + "MB),";
-			}, "").slice(0,-1)
-		);
+		if (global.settings.twitter.enableTwitterBot){
+			twitterBot.SendDirectMessage("Adding" +
+				data.reduce(function(prev, curr){ 
+					return prev + " " + curr.title + " (" + (curr.size / 1024 / 1024).toFixed(2) + "MB),";
+				}, "").slice(0,-1)
+			);
+		}
 		rssListener.AddDownloads(
 			data.map(function(element){ return element.id; }), 
 			(!!global.settings.services.transmission.jobs && global.settings.services.transmission.jobs[1].nextInvocation() < global.settings.services.transmission.jobs[0].nextInvocation()) ? true : false

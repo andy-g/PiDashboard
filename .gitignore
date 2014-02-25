@@ -13,4 +13,5 @@ results
 
 npm-debug.log
 node_modules/
-usage_history*.json
+source/usage_history*.json
+distribute/

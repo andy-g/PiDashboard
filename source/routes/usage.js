@@ -4,6 +4,7 @@ var request = require('request'),
 	formatHelper = require('./formatHelper'),
 	schedule = require('node-schedule');
 
+var heapdump = require('heapdump');
 
 //try cache data, and load it on startup or when rewriting to the file
 exports.usageSummary = function(req, res) {
@@ -26,12 +27,12 @@ exports.usageSummary = function(req, res) {
 
 			//process each period
 			data.forEach(function(currentPeriod){
-		  		var periodUsage = 0;
+				var periodUsage = 0;
 				var jobPeriod = global.settings.timePeriods.filter(function (element, index, array) {  
 						return currentPeriod.isCurrent ? 
 							element.endHour > (new Date(currentPeriod.date)).getHours() :
 							element.endHour >= (new Date(currentPeriod.date)).getHours();
-		  			}).sort(function(a,b){ return a.endHour - b.endHour; })[0];
+					}).sort(function(a,b){ return a.endHour - b.endHour; })[0];
 				var periodDate = new Date(currentPeriod.date);
 
 				//group stats by device (some devices are duplicated for distinct IP's e.g. VPN)
@@ -53,17 +54,17 @@ exports.usageSummary = function(req, res) {
 					if (!data.totals[mac_add]) {
 						data.totals[mac_add] = { usageToDate: { total: 0 }, usageToday: { total: 0 }, lastTotal: 0 };
 						data.totals[mac_add].device_name = global.settings.namedDevices[mac_add] || "unknown";
-					data.totals[mac_add].ip_add = currentDevice.ip_add;
+						data.totals[mac_add].ip_add = currentDevice.ip_add;
 					}
 					
-
+			
 					//If we're starting a new month, period usage should be forced to 0
 					if (periodDate.getDate() != 1 || periodDate.getHours() != 0){
 						periodUsage = parseInt(currentDevice.total_bytes) - (data.totals[mac_add].lastTotal || 0);
 						if (periodUsage < 0) { //if periodUsage is < 0, router must have been reset in the period, so just use the Total usage as a period usage
 							periodUsage = parseInt(currentDevice.total_bytes);
 						}
-		  			}
+					}
 
 					//Need to record this even if periodUsage = 0, otherwise opening balance is ignored and included in the next period usage
 					data.totals[mac_add].lastTotal = parseInt(currentDevice.total_bytes);
@@ -76,12 +77,12 @@ exports.usageSummary = function(req, res) {
 
 					data.totals[mac_add].usageToDate[jobPeriod.name] = (data.totals[mac_add].usageToDate[jobPeriod.name] || 0) + periodUsage;
 					data.totals[mac_add].usageToDate.total = data.totals[mac_add].usageToDate.total + periodUsage;
-
+					
 					//Get Today's (runDate) usage (only include if period date is after 00:01 - allow 1 minute delay in midnight run running)
 					if (periodDate > new Date(runDate).setHours(0,1,0,0) && periodDate <= new Date(new Date(runDate).setDate(runDate.getDate()+1)).setHours(0,1,0,0)){
 						data.totals[mac_add].usageToday[jobPeriod.name] = (data.totals[mac_add].usageToday[jobPeriod.name] || 0) + periodUsage;
 						data.totals[mac_add].usageToday.total = data.totals[mac_add].usageToday.total + periodUsage;
-		  			}
+					}
 				}
 			});
 
@@ -109,6 +110,8 @@ exports.usageSummary = function(req, res) {
 
 			//Nullify variable to force Garbage Collection
 			data = null;
+
+			//heapdump.writeSnapshot();
 		});
 	});
 };
@@ -116,6 +119,8 @@ exports.usageSummary = function(req, res) {
 
 exports.drives = function(req, res) {
    	res.header("Access-Control-Allow-Origin", "*");
+	res.json({"date": 1377848728838,"drives": [{"mount": "/","size": "7.3G","avail": "5.7G","used": "18%"},{"mount": "/boot","size": "69M","avail": "63M","used": "9%"},{"mount": "/media/video","size": "466G","avail": "16G","used": "97%"},{"mount": "/media/timemachine","size": "466G","avail": "101G","used": "79%"}]});
+	/*
 	exec("df -h", function(error, stdout, stderr){
 		if (error !== null) {
 				console.log('exec error: ' + error);
@@ -128,6 +133,7 @@ exports.drives = function(req, res) {
     				res.json(drive_usage);
 	    	})
 	});
+	*/
 };
 
 exports.serviceStatus = function(req, res) {
@@ -156,7 +162,7 @@ exports.serviceStatus = function(req, res) {
 			if (serviceStop.nextInvocation() < serviceStart.nextInvocation())
 				status = "start";
 		}
-	} 
+	}
 
 	var isScheduled = !!service.jobs;
 	if (status != "status" && req.route.method != "put"){
@@ -207,7 +213,7 @@ function GetUsageHistory(callback){
 function GetCurrentUsage(callback){
 	var current_usage = { "date": Date.now(), "stats": new Array() };
 	request(
-		{uri: global.settings.routerStatsUri, strictSSL: false},
+		{uri: 'http://localhost:8080/RouterStats.htm', strictSSL: false},
 		function(err, response, body){
 			if (err){
 				callback( { msg: "GetCurrentUsage: No response body.", "error": err } );
@@ -220,7 +226,7 @@ function GetCurrentUsage(callback){
 				}
 				callback(err, current_usage);
 			}
-        }
+		}
 	);
 };
 exports.GetCurrentUsage = GetCurrentUsage;
