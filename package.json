@@ -1,13 +1,34 @@
 {
   "name": "PiDashboard",
   "version": "0.0.1",
+  "description": "A dashboard to monitor a raspberry pi, and access local network usage",
+  "main": "app.js",
+  "homepage": "https://github.com/andy-g/PiDashboard",
+  "scripts": {
+    "test": "grunt test"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git@github.com:andy-g/PiDashboard.git"
+  },
+  "bugs": {
+    "url": "https://github.com/andy-g/PiDashboard/issues"
+  },
   "dependencies": {
     "express": "3.x",
     "request": "2.x",
     "node-schedule": "0.x",
     "twitter": "0.2.x",
     "moment": "2.x",
-    "xml2js": "0.2.x"
+    "xml2js": "0.2.x",
+    "grunt": "~0.4.2",
+    "grunt-contrib-csslint": "~0.2.0",
+    "grunt-contrib-jshint": "~0.8.0",
+    "time-grunt": "~0.2.9",
+    "load-grunt-tasks": "~0.3.0",
+    "grunt-contrib-copy": "~0.5.0",
+    "grunt-contrib-clean": "~0.5.0",
+    "grunt-contrib-nodeunit": "~0.3.2"    
   },
   "engines": {
     "node": "0.10.x"

@@ -1,10 +1,9 @@
 var	express = require('express'),
 	fs = require('fs'),
-	usage = require('./routes/usage'),
 	request = require('request'),
-	schedule = require('node-schedule');
-
-global.settings = require('./app.config.json');
+	schedule = require('node-schedule'),
+	routes = require('./routes'),
+	appSettings = require('./app.config.json');
 
 //Prevent the application from crashing due to any unhandled exceptions
 process.on('uncaughtException', function(err) {
@@ -19,31 +18,27 @@ app.use(express.bodyParser());
 app.use(express.static(__dirname + '/public'));
 
 //-----routes-----
-app.get('/', function(req, res){ res.send('hello world'); });
-app.get('/summary/:runDate?', usage.usageSummary);
-app.get('/drives', usage.drives);
-app.get('/services/:service?/:status?', usage.serviceStatus);
-app.put('/services/:service?/:status?', usage.serviceStatus);
+routes(app, appSettings);
 
 //-----start server (comment out app.listen and uncomment previous lines to use https)-----
 //https = require('https');
-// var options = {
-// 	key: fs.readFileSync('keys/server-key.pem'),
-// 	cert: fs.readFileSync('keys/server-cert.pem')
-// };
+//var options = {
+//	key: fs.readFileSync('keys/server-key.pem'),
+//	cert: fs.readFileSync('keys/server-cert.pem')
+//};
 //https.createServer(options, app).listen(8080);//(443);
 app.listen(8080);
 console.log('Listening on 8080');
 
 //-----start scheduled tasks
 var rule = new schedule.RecurrenceRule();
-rule.hour = global.settings.timePeriods.map(function(element){ 
+rule.hour = appSettings.timePeriods.map(function(element){ 
 	return element.endHour % 24; 
 });
 rule.minute = 0;
 
 var j = schedule.scheduleJob('network usage log',rule, function(){
-	console.log(new Date().toJSON() + " Scheduled Job Starting: ")
+	console.log(new Date().toJSON() + " Scheduled Job Starting: ");
 	usage.GetCurrentUsage(function(err, current_usage){
 		if (err) { 
 			console.log(new Date().toJSON() + " save error: " + JSON.stringify(err));
@@ -57,9 +52,12 @@ var j = schedule.scheduleJob('network usage log',rule, function(){
 console.log(new Date().toJSON() + ' Scheduled job started for time periods (hours of day): ' + rule.hour);
 
 //-----listen for direct messages
-if (global.settings.twitter.enableTwitterBot){
-	var twitterBot = require('./routes/twitterBot');
+if (appSettings.twitter.enableTwitterBot){
+	var TwitterBot = require('./routes/twitterBot');
+	var twitterBot = new TwitterBot(appSettings);
+
 	twitterBot.on('tweet',function(data){
+		console.log('Tweet event received');
 		if (data.direct_message && data.direct_message.sender_screen_name != 'PiTweetBot'){
 			console.log(new Date().toJSON() + ' new tweet event handler: ' + data.direct_message.text);
 			
@@ -76,28 +74,32 @@ if (global.settings.twitter.enableTwitterBot){
 			} 
 
 			//--Queue or Dowload Torrent(s)
-			else if (global.settings.rss.enableRssListener && /DL #|QUEUE #/i.test(data.direct_message.text)) {
-				rssListener.AddDownloads(data.direct_message.text.match(/#[0-9]+/gi).map(function(num){ return num.replace(/#/,'') }), /DL #/i.test(data.direct_message.text));
+			else if (appSettings.rss.enableRssListener && /DL #|QUEUE #/i.test(data.direct_message.text)) {
+				rssListener.AddDownloads(data.direct_message.text.match(/#[0-9]+/gi).map(function(num){ return num.replace(/#/,''); }), /DL #/i.test(data.direct_message.text));
 			}
 		}
-	})
+	});
 	twitterBot.StartTwitterListener();
 }
 
 //-----listen for rss
 var rssListener;
-if (global.settings.rss.enableRssListener){
-	rssListener = require('./routes/rssListener');
+if (appSettings.rss.enableRssListener){
+	RssListener = require('./routes/rssListener');
+	var rssListener = new RssListener(appSettings);
+
 	rssListener.on('newTorrents',function(data){
 		console.log(new Date().toJSON() + " New torrent event");
-		twitterBot.SendDirectMessage("Adding" +
-			data.reduce(function(prev, curr){ 
-				return prev + " " + curr.title + " (" + (curr.size / 1024 / 1024).toFixed(2) + "MB),";
-			}, "").slice(0,-1)
-		);
+		if (global.settings.twitter.enableTwitterBot){
+			twitterBot.SendDirectMessage("Adding" +
+				data.reduce(function(prev, curr){ 
+					return prev + " " + curr.title + " (" + (curr.size / 1024 / 1024).toFixed(2) + "MB),";
+				}, "").slice(0,-1)
+			);
+		}
 		rssListener.AddDownloads(
 			data.map(function(element){ return element.id; }), 
-			(!!global.settings.services.transmission.jobs && global.settings.services.transmission.jobs[1].nextInvocation() < global.settings.services.transmission.jobs[0].nextInvocation()) ? true : false
+			(!!appSettings.services.transmission.jobs && appSettings.services.transmission.jobs[1].nextInvocation() < appSettings.services.transmission.jobs[0].nextInvocation()) ? true : false
 		);
 	});
 	rssListener.on('torrentAdded',function(data){

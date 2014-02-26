@@ -7,16 +7,16 @@ window.onload=function(){
 	document.getElementById("refresh").onclick = function(){ 
 		this.style.display = 'none';
 		getUsage();
-	}
+	};
 
 	$('.arrow').click(function() {
 		if (!$(this).hasClass('disabled')){
 			var targetDate;
 			var _currentDate = new Date(currentDate);
 			if ($(this).hasClass('left')){
-				targetDate = _currentDate.setDate(_currentDate.getDate()-1)
+				targetDate = _currentDate.setDate(_currentDate.getDate()-1);
 			}else{
-				targetDate = _currentDate.setDate(_currentDate.getDate()+1)
+				targetDate = _currentDate.setDate(_currentDate.getDate()+1);
 			}
 			if (new Date(targetDate).setHours(0,0,0,0) === new Date(Date.now()).setHours(0,0,0,0)){
 				targetDate = undefined;
@@ -34,7 +34,7 @@ window.onload=function(){
 			$("[name='service']:eq(0)").addClass('btn-danger').text('stopping...').addClass('disabled');
 			$("[name='service']:eq(1)").removeClass('btn-success');
 			setServiceStatus("transmission","stop");
-		} else if ($(this).val() == 0) {
+		} else if ($(this).val() === 0) {
 			$("[name='service']:eq(0)").removeClass('btn-danger');
 			$("[name='service']:eq(1)").addClass('btn-success').text('starting...').addClass('disabled');
 			setServiceStatus("transmission","start");
@@ -57,12 +57,12 @@ function setServiceStatus(service, status, isScheduled) {
 		$("[name='service']:eq(1)").removeClass('btn-success').text('start').removeClass('disabled').removeClass('active');
 		$("[name='service']:eq(2)").removeClass('active').removeClass('disabled');
 
-		if(data.status == true)
+		if(data.status === true)
 			$("[name='service']:eq(1)").addClass('btn-success').text('started').addClass('active');
-		else if (data.status == false)
+		else if (data.status === false)
 			$("[name='service']:eq(0)").addClass('btn-danger').text('stopped').addClass('active');
 
-		if (data.isScheduled == true)
+		if (data.isScheduled === true)
 			$("[name='service']:eq(2)").addClass('active');
 		else
 			$("[name='service']:eq(2)").removeClass('active');
