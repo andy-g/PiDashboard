@@ -7,7 +7,7 @@ var request = require('request'),
 //var heapdump = require('heapdump');
 
 function ContentHandler (appSettings) {
-	"use strict";
+	'use strict';
 
 	//try cache data, and load it on startup or when rewriting to the file
 	this.usageSummary = function(req, res) {

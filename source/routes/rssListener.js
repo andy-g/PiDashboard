@@ -7,6 +7,8 @@ var	util = require("util"),
 	domain = require('domain');
 
 function RssListener (appSettings) {
+	'use strict';
+
 	EventEmitter.call(this);
 
 	var retryJobId = null;

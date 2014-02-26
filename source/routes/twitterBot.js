@@ -4,6 +4,8 @@ var util = require("util"),
 	domain = require('domain');
 
 function TwitterBot(appSettings) {
+	'use strict';
+
 	EventEmitter.call(this);
 
 	var twit = new twitter(appSettings.twitter.keys);
