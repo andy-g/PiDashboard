@@ -40,13 +40,7 @@
         files: [
           {
             expand : true,
-            cwd    : 'source',
-            src    : ['**', '**/.*'],
-            dest   : 'distribute'
-          },
-          {
-            expand : true,
-            src    : ['package.json'],
+            src    : ['package.json','app.config.json','app.js','keys/**','public/**','routes/**'],
             dest   : 'distribute'
           }
         ]
