@@ -1,28 +1,25 @@
 var util = require("util"),
 	twitter = require('twitter'),
 	EventEmitter = require("events").EventEmitter,
-	events = require("events"),
 	domain = require('domain');
 
-function TwitterBot (appSettings) {
+function TwitterBot(appSettings) {
 	EventEmitter.call(this);
+
+	var twit = new twitter(appSettings.twitter.keys);
+	var retryJobId = null;
 
 	var d = domain.create();
 	d.on('error', function(er) {
 		console.error(new Date().toJSON() + ' Caught twitterBot error!', er);
 		console.log(er.stack);
-		twitterBot.emit('error', er);
+		//this.emit('error', er);
+
+		//Clear an existing scheduled timeout (if present), and then reschedule
+		clearTimeout(retryJobId);
+		retryJobId = setTimeout(function(){ this.StartTwitterListener(); }, 1000 * 30);
 	});
 
-	var twit = new twitter(appSettings.twitter.keys);
-	var streamRetryJob = null;
-	//var twitterBot = new events.EventEmitter();
-	//function twitterBot () {
-	//	EventEmitter.call(this);
-	//}
-	//util.inherits(this, EventEmitter);
-
-	//twitterBot.prototype.SendDirectMessage = d.bind(function(message, recipient, callback){
 	this.SendDirectMessage = d.bind(function(message, recipient, callback){
 		if (typeof recipient === 'function'){
 			callback = recipient;
@@ -46,40 +43,34 @@ function TwitterBot (appSettings) {
 		});	
 	});
 
-	this.emit("tweet",null);
-
-	//twitterBot.prototype.StartTwitterListener = d.bind(function(){
-	this.StartTwitterListener = function(){//d.bind(function(){
-		//var instance = this;
+	this.StartTwitterListener = d.bind(function(){
+		var twitterBot = this;
 		twit.stream('user', function(stream) {
 			console.log(new Date().toJSON() + " Listening for tweets...");
-			stream.on('data', function(data) {
-				console.log('Tweet Received:');
-				this.emit("tweet",data);
+			stream.on('data', function (data) {
+				//console.log('Tweet Received:');
+				twitterBot.emit("tweet",data);
 			});
-			stream.on('error', function(data) {
+			stream.on('error', function(error) {
 				console.log(new Date().toJSON() + ' Twitter error, scheduling reconnect');
-				console.log(data);
+				console.log(error.stack);
 				stream.destroy();
-				//streamRetryJob = setTimeout(function(){ twitterBot.StartTwitterListener(); }, 1000 * 30);
 			});
 			stream.on('close', function(data) { 
 				console.log(new Date().toJSON() + ' Twitter Stream Closed on twitter end'); 
-				console.log(data);
+				//console.log(data);
 				stream.destroy();
-				//streamRetryJob = setTimeout(function(){ twitterBot.StartTwitterListener(); }, 1000 * 30);
 			});
 			stream.on('end', function(data) { 
 				console.log(new Date().toJSON() + ' Twitter Stream Ended'); 
 				stream.destroy();
-				//streamRetryJob = setTimeout(function(){ twitterBot.StartTwitterListener(); }, 1000 * 30);
 			});
 			stream.on('destroy', function(data) { 
 				console.log(new Date().toJSON() + ' Twitter Stream Destroyed'); 
-				streamRetryJob = setTimeout(function(){ this.StartTwitterListener(); }, 1000 * 30);
+				retryJobId = setTimeout(function(){ twitterBot.StartTwitterListener(); }, 1000 * 30);
 			});
 		});
-	}//;
+	});	
 }
 util.inherits(TwitterBot, EventEmitter);
 

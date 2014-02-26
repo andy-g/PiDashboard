@@ -14,13 +14,13 @@ function ContentHandler (appSettings) {
 		var runDate = !req.param('runDate') ? new Date() : new Date(parseInt(req.param('runDate')));
 
 		res.header("Access-Control-Allow-Origin", "*");
-		GetCurrentUsage(function (err, current_usage) {
+		getCurrentUsage(function (err, current_usage) {
 			if (!current_usage){
 				res.json(500, {"err" : "Current usage could not be retrieved - check router status."});
 				return;
 			}
 
-			GetUsageHistory(function (err, data) {
+			getUsageHistory(function (err, data) {
 				current_usage.isCurrent = true;
 				data = data.concat(current_usage);
 
@@ -129,7 +129,7 @@ function ContentHandler (appSettings) {
 				console.log('exec error: ' + error);
 				res.json(500, {"err" : "Disk usage could not be retrieved."});
 			}
-				GetDriveUsage(stdout, function(err, drive_usage){
+				getDriveUsage(stdout, function(err, drive_usage){
 					if (err) {
 					res.json(500, {"err" : "Disk usage could not be retrieved."});
 				} else	
@@ -157,8 +157,8 @@ function ContentHandler (appSettings) {
 				delete service.jobs;
 			} 
 			if (req.param('isScheduled') === 'true' && service.startSchedule && service.endSchedule){
-				var serviceStart = schedule.scheduleJob(service.serviceName + '-start', service.startSchedule, function(){ ExecService(service.serviceName, 'start'); });
-				var serviceStop  = schedule.scheduleJob(service.serviceName + '-stop', service.endSchedule,   function(){ ExecService(service.serviceName, 'stop'); });
+				var serviceStart = schedule.scheduleJob(service.serviceName + '-start', service.startSchedule, function(){ execService(service.serviceName, 'start'); });
+				var serviceStop  = schedule.scheduleJob(service.serviceName + '-stop', service.endSchedule,   function(){ execService(service.serviceName, 'stop'); });
 				service.jobs = [serviceStart, serviceStop];
 
 				//if it's currently after startSchedule and before endSchedule, set status = "start"
@@ -173,7 +173,7 @@ function ContentHandler (appSettings) {
 			return;
 		}
 
-		ExecService(service.serviceName, status, function(output){ 
+		execService(service.serviceName, status, function(output){ 
 			if (!output.err) {
 				output.isScheduled = isScheduled;
 				res.json(output);
@@ -183,7 +183,7 @@ function ContentHandler (appSettings) {
 		});
 	};
 
-	function ExecService(serviceName, status, callback){
+	function execService(serviceName, status, callback){
 		var d = require('domain').create();
 		d.on('error', function(err){
 			console.log('Exec Service Error:');
@@ -206,20 +206,20 @@ function ContentHandler (appSettings) {
 		});
 	}
 
-	function GetUsageHistory(callback){
+	function getUsageHistory(callback){
 		fs.readFile(global.settings.usageHistoryPath, function (err, data) {
 			var usage_history = (!data || data.length === 0) ? [] : JSON.parse(data);
 			callback(undefined, usage_history);
 		});
 	}
 
-	this.GetCurrentUsage = function (callback){
+	this.getCurrentUsage = function (callback){
 		var current_usage = { "date": Date.now(), "stats": [] };
 		request(
 			{uri: 'http://localhost:8080/RouterStats.htm', strictSSL: false},
 			function(err, response, body){
 				if (err){
-					callback( { msg: "GetCurrentUsage: No response body.", "error": err } );
+					callback( { msg: "getCurrentUsage: No response body.", "error": err } );
 				} else {
 					//Iterate through current usage stats for each device
 					var mac_row_collection = body.match(/"(?:[0-9]{1,3}\.){3}[0-9]{1,3}.*(?=,)/gi);
@@ -231,10 +231,10 @@ function ContentHandler (appSettings) {
 				}
 			}
 		);
-	}
+	};
 
-	this.SaveUsageHistory = function(currentUsage, callback){
-		GetUsageHistory(function (err, data) {
+	this.saveUsageHistory = function(currentUsage, callback){
+		getUsageHistory(function (err, data) {
 			if (data){
 				//If it's the first day of the month, backup the current file with a _YYYYMM suffix, eg: usage_history_201306.json
 				var _date = new Date(currentUsage.date);
@@ -256,11 +256,11 @@ function ContentHandler (appSettings) {
 				data = null;
 			}
 			else 
-				callback( { msg: "SaveUsageHistory: No data found.", "error": err } );
+				callback( { msg: "saveUsageHistory: No data found.", "error": err } );
 		});
-	}
+	};
 
-	function GetDriveUsage(stdout, callback) {
+	function getDriveUsage(stdout, callback) {
 		var drive_usage = { "date": Date.now(), "drives": [] };
 		var drives = stdout.match(/\/dev.*/gi);
 		if (drives === null){

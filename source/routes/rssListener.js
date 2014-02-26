@@ -1,18 +1,16 @@
 var	util = require("util"),
 	http = require('http'),
 	parseString = require('xml2js').parseString,
-	//events = require("events"),
 	EventEmitter = require("events").EventEmitter,
 	twitterBot = require('./twitterBot'),
 	exec = require('child_process').exec,
 	domain = require('domain');
 
-var retryJobId = null;
-var torrentList = [];
-//var rssListener = new events.EventEmitter(); 
 function RssListener (appSettings) {
-    //events.EventEmitter.call(this);
-    EventEmitter.call(this);
+	EventEmitter.call(this);
+
+	var retryJobId = null;
+	var torrentList = [];
 
 	var d = domain.create();
 	d.on('error', function(er) {
@@ -21,15 +19,15 @@ function RssListener (appSettings) {
 		
 		//Clear an existing scheduled timeout (if present), and then reschedule
 		clearTimeout(retryJobId);
-		retryJobId = setTimeout(function(){ rssListener.RssCheck(); }, appSettings.rss.interval);
+		retryJobId = setTimeout(function(){ this.RssCheck(); }, appSettings.rss.interval);
 	});
 
 	this.RssCheck = d.bind(function(){
-		var instance = this;
+		var rssListener = this;
 		http.get(appSettings.rss.rssPaths[0], function(res){
 			if (res.statusCode != 200){
 				console.log(new Date().toJSON() + " Error retrieving rss, http statusCode: " + res.statusCode);
-				retryJobId = setTimeout(function(){ instance.RssCheck(); }, appSettings.rss.interval);
+				retryJobId = setTimeout(function(){ rssListener.RssCheck(); }, appSettings.rss.interval);
 				return;
 			}
 
@@ -52,22 +50,21 @@ function RssListener (appSettings) {
 							}
 						});
 						if (torrents.length > 0)
-							instance.emit('newTorrents', torrents); 
+							rssListener.emit('newTorrents', torrents); 
 					}
-					retryJobId = setTimeout(function(){ instance.RssCheck(); }, appSettings.rss.interval);
+					retryJobId = setTimeout(function(){ rssListener.RssCheck(); }, appSettings.rss.interval);
 				});
 			});
 		});
 	});
 
-	this.AddDownloads = d.bind(function(ids, startDownload){//, callback){
+	this.AddDownloads = d.bind(function(ids, startDownload){
 		//console.log(new Date().toJSON() + " Will queue or download torrent (from rssListener): " + torrentList[id]);
-		var instance = this;
+		var rssListener = this;
 		exec("sudo service transmission-daemon status", function(error, stdout, stderr){
 			var cmd = '';
 			ids.forEach(function(id){
 				cmd = cmd + " transmission-remote --auth "+ appSettings.rss.username +":"+ appSettings.rss.password +
-					//(startDownload ? " --no-start-paused" : " --start-paused") +
 					" --no-start-paused" + //Always add the torrent unpaused, queued torrents won't leave the service running though
 					" -a '" + torrentList[id] + "'; ";
 			});
@@ -78,23 +75,17 @@ function RssListener (appSettings) {
 			exec(cmd, function(error, stdout, stderr){
 					console.error(error,stdout,stderr);
 					if (error){
-						instance.emit('torrentAdded', { "error": error, "status": false }); 
+						rssListener.emit('torrentAdded', { "error": error, "status": false }); 
 						return;
 					}
 					
 					if (stdout.indexOf('duplicate torrent') > -1)
 							error = "duplicate torrent";
-					instance.emit('torrentAdded', { "error": error, "status": stdout.match(/responded: \"success\"/gi).length == (ids.length * 2), "ids": ids });
+					rssListener.emit('torrentAdded', { "error": error, "status": stdout.match(/responded: \"success\"/gi).length == (ids.length * 2), "ids": ids });
 			});
 		});
 	});
 }
-//util.inherits(rssListener, events.EventEmitter);
 util.inherits(RssListener, EventEmitter);
 
 module.exports = RssListener;
-
-
-//function TorrentEvent(error,status,torrentTitle, torrentSize, torrentId){
-//	return { "error": error, "status": status, "torrent": { "title": torrentTitle, "size": torrentSize, "id": torrentId } };
-//}
