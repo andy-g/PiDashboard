@@ -2,6 +2,7 @@ var request = require('request'),
 	exec = require('child_process').exec,
 	fs = require('fs'),
 	formatHelper = require('./formatHelper'),
+	system = require('./system'),
 	schedule = require('node-schedule');
 
 //var heapdump = require('heapdump');
@@ -31,7 +32,7 @@ function ContentHandler (appSettings) {
 				//process each period
 				data.forEach(function(currentPeriod){
 					var periodUsage = 0;
-					var jobPeriod = global.settings.timePeriods.filter(function (element, index, array) {  
+					var jobPeriod = appSettings.timePeriods.filter(function (element, index, array) {  
 							return currentPeriod.isCurrent ? 
 								element.endHour > (new Date(currentPeriod.date)).getHours() :
 								element.endHour >= (new Date(currentPeriod.date)).getHours();
@@ -56,7 +57,7 @@ function ContentHandler (appSettings) {
 						
 						if (!data.totals[mac_add]) {
 							data.totals[mac_add] = { usageToDate: { total: 0 }, usageToday: { total: 0 }, lastTotal: 0 };
-							data.totals[mac_add].device_name = global.settings.namedDevices[mac_add] || "unknown";
+							data.totals[mac_add].device_name = appSettings.namedDevices[mac_add] || "unknown";
 							data.totals[mac_add].ip_add = currentDevice.ip_add;
 						}
 						
@@ -120,24 +121,18 @@ function ContentHandler (appSettings) {
 
 	this.drives = function(req, res) {
 		res.header("Access-Control-Allow-Origin", "*");
-		exec("df -h", function(error, stdout, stderr){
-			if (error !== null) {
-				console.log('exec error: ' + error);
-				res.json(500, {"err" : "Disk usage could not be retrieved."});
-			}
-				getDriveUsage(stdout, function(err, drive_usage){
-					if (err) {
-					res.json(500, {"err" : "Disk usage could not be retrieved."});
-				} else	
-					res.json(drive_usage);
-			});
+		system.driveUsage(function(error, data){
+			if (!error)
+				res.json(500, error);
+			else
+				res.json(data);
 		});
 	};
 
 	this.serviceStatus = function(req, res) {
 		res.header("Access-Control-Allow-Origin", "*");
 
-		var service = global.settings.services[req.param('service')];
+		var service = appSettings.services[req.param('service')];
 
 		//If service isn't in config then exit 
 		if (!service){
@@ -202,13 +197,13 @@ function ContentHandler (appSettings) {
 	}
 
 	function getUsageHistory(callback){
-		fs.readFile(global.settings.usageHistoryPath, function (err, data) {
+		fs.readFile(appSettings.usageHistoryPath, function (err, data) {
 			var usage_history = (!data || data.length === 0) ? [] : JSON.parse(data);
 			callback(undefined, usage_history);
 		});
 	}
 
-	this.getCurrentUsage = function (callback){
+	function getCurrentUsage(callback){
 		var current_usage = { "date": Date.now(), "stats": [] };
 		request(
 			{uri: appSettings.routerStatsUri, strictSSL: false},
@@ -218,9 +213,9 @@ function ContentHandler (appSettings) {
 				} else {
 					//Iterate through current usage stats for each device
 					var mac_row_collection = body.match(/"(?:[0-9]{1,3}\.){3}[0-9]{1,3}.*(?=,)/gi);
-					for (i = 0; i < mac_row_collection.length; i++){
+					for (var i = 0; i < mac_row_collection.length; i++){
 						var row_array = mac_row_collection[i].replace(/(\s|")/g,'').split(',');
-						current_usage.stats[i] = {"ip_add" : row_array[0], "mac_add" : row_array[1], "device_name" : (global.settings.namedDevices[row_array[1]] || "unknown"), "total_bytes" : parseInt(row_array[3]) };
+						current_usage.stats[i] = {"ip_add" : row_array[0], "mac_add" : row_array[1], "device_name" : (appSettings.namedDevices[row_array[1]] || "unknown"), "total_bytes" : parseInt(row_array[3]) };
 					}
 					callback(err, current_usage);
 				}
@@ -236,14 +231,14 @@ function ContentHandler (appSettings) {
 				if (_date.getDate() == 1 && _date.getHours() === 0){
 					_date.setDate(_date.getDate()-1); //Move date back 1 day to determine previous month details
 					fs.renameSync(
-						global.settings.usageHistoryPath, 
-						global.settings.usageHistoryPath.replace(".json","_" + _date.getFullYear() + formatHelper.padNumber(_date.getMonth() + 1, 2) + ".json")
+						appSettings.usageHistoryPath, 
+						appSettings.usageHistoryPath.replace(".json","_" + _date.getFullYear() + formatHelper.padNumber(_date.getMonth() + 1, 2) + ".json")
 					);
 					//Reset data for the new month
 					data = [];
 				}
 
-				fs.writeFile(global.settings.usageHistoryPath, JSON.stringify(data.concat(currentUsage), null, "\t"), function(err) {
+				fs.writeFile(appSettings.usageHistoryPath, JSON.stringify(data.concat(currentUsage), null, "\t"), function(err) {
 					callback( {"message" : "usage data saved successfully."} );
 				});
 
@@ -254,21 +249,6 @@ function ContentHandler (appSettings) {
 				callback( { msg: "saveUsageHistory: No data found.", "error": err } );
 		});
 	};
-
-	function getDriveUsage(stdout, callback) {
-		var drive_usage = { "date": Date.now(), "drives": [] };
-		var drives = stdout.match(/\/dev.*/gi);
-		if (drives === null){
-			callback("Drive usage could not be retrieved.", undefined);	
-			return;
-		}
-		
-		drives.forEach(function(drive){
-			var row_array = drive.split(/\s+/g);
-			drive_usage.drives.push({"mount" : row_array[5], "size" : row_array[1], "avail" : row_array[3], "used" : row_array[4]});
-		});
-		callback(undefined, drive_usage);
-	}
 }
 
 module.exports = ContentHandler;

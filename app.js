@@ -90,7 +90,7 @@ if (appSettings.rss.enableRssListener){
 
 	rssListener.on('newTorrents',function(data){
 		console.log(new Date().toJSON() + " New torrent event");
-		if (global.settings.twitter.enableTwitterBot){
+		if (appSettings.twitter.enableTwitterBot){
 			twitterBot.SendDirectMessage("Adding" +
 				data.reduce(function(prev, curr){ 
 					return prev + " " + curr.title + " (" + (curr.size / 1024 / 1024).toFixed(2) + "MB),";
