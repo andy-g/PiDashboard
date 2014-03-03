@@ -19,9 +19,12 @@
 
     grunt.config('csslint', {
       options: {
-        'adjoining-classes': false
+        'adjoining-classes': false,
+        'box-sizing': false,
+        'unqualified-attributes': false,
+        'outline-none': false
       },
-      main: ['css/main.css']//,'source/**/*.css']
+      main: ['public/**/*.css']
     });
 
     grunt.config('nodeunit', {
@@ -47,7 +50,25 @@
       }
     });
 
-    grunt.registerTask('default', ['test', 'clean', 'copy']);
+    grunt.config('cssmin', {
+      // combine: {
+      //   files: {
+      //     'distribute/public/resources/output.css': ['distribute/public/resources/PiDashboard.css', 'distribute/public/resources/other.css']
+      //   }
+      // },
+      minify: {
+        expand: true,
+        cwd: 'distribute/public/resources',
+        src: ['*.css', '!*.min.css'],
+        dest: 'distribute/public/resources',
+        ext: '.min.css',
+        options: {
+          report: 'gzip'
+        }
+      }
+    });
+
+    grunt.registerTask('default', ['test', 'clean', 'copy', 'cssmin' ]);
     grunt.registerTask('test', ['jshint', 'csslint', 'nodeunit']);
   };
 }());

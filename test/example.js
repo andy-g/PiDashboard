@@ -43,8 +43,8 @@ exports.group = {
 				var _json = '';
 				this.header = function(){};
 				this.json = function(jsonIn){ 
-					console.log('settings _json');
-					console.log(jsonIn);
+					//console.log('settings _json');
+					//console.log(jsonIn);
 					this._json = jsonIn; 
 				};
 		};
