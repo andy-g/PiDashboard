@@ -11,18 +11,18 @@ module.exports = function(appSettings){
 				callback({"err" : "Disk usage could not be retrieved."}, null);
 				return;
 			}
-			formatDriveUsage(stdout, function(err, drive_usage){
+			this.formatDriveUsage(stdout, function(err, drive_usage){
 				if (err) {
 					//res.json(500, {"err" : "Disk usage could not be retrieved."});
 					callback({"err" : "Disk usage could not be retrieved."}, null);
 				} else	{
-					callback(null, drive_sage);//res.json(drive_usage);
+					callback(null, drive_usage);//res.json(drive_usage);
 				}
 			});
 		});
 	};
 
-	function formatDriveUsage(stdout, callback) {
+	this.formatDriveUsage = function(stdout, callback) {
 		var drive_usage = { "date": Date.now(), "drives": [] };
 		var drives = stdout.match(/\/dev.*/gi);
 		if (drives === null){
@@ -35,7 +35,7 @@ module.exports = function(appSettings){
 			drive_usage.drives.push({"mount" : row_array[5], "size" : row_array[1], "avail" : row_array[3], "used" : row_array[4]});
 		});
 		callback(undefined, drive_usage);
-	}
+	};
 
 	this.getCurrentNetworkUsage = function(callback){
 		var current_usage = { "date": Date.now(), "stats": [] };
@@ -215,9 +215,7 @@ module.exports = function(appSettings){
 
 		d.run(function(){
 			exec("sudo /etc/init.d/" + serviceName + " " + status, function(error, stdout, stderr){
-				//if (status != "status" && error !== null) {
 				if (error !== null) {
-					//console.log('exec error: ' + error + ' stdout: ' + stdout + ' stderr: ' + stderr);
 					console.log('exec error: ' + error.stack);
 					if (callback)
 						callback({"err" : "Service status could not be " + (status == "start" ? "started" : "stopped") +"."});
