@@ -3,7 +3,8 @@ var	express = require('express'),
 	request = require('request'),
 	schedule = require('node-schedule'),
 	routes = require('./routes'),
-	appSettings = require('./app.config.json');
+	appSettings = require('./app.config.json'),
+	System = require('./routes/system');
 
 //Prevent the application from crashing due to any unhandled exceptions
 process.on('uncaughtException', function(err) {
@@ -38,15 +39,10 @@ rule.hour = appSettings.timePeriods.map(function(element){
 rule.minute = 0;
 
 var j = schedule.scheduleJob('network usage log',rule, function(){
+	var system = new System(appSettings);
 	console.log(new Date().toJSON() + " Scheduled Job Starting: ");
-	usage.GetCurrentUsage(function(err, current_usage){
-		if (err) { 
-			console.log(new Date().toJSON() + " save error: " + JSON.stringify(err));
-		} else {
-			usage.SaveUsageHistory(current_usage, function(message){
-				console.log(message);
-			});
-		}
+	system.saveCurrentNetworkUsage(function(message){
+		console.log(message);
 	});
 });
 console.log(new Date().toJSON() + ' Scheduled job started for time periods (hours of day): ' + rule.hour);
