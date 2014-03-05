@@ -34,7 +34,7 @@ window.onload=function(){
 			$("[name='service']:eq(0)").addClass('btn-danger').text('stopping...').addClass('disabled');
 			$("[name='service']:eq(1)").removeClass('btn-success');
 			setServiceStatus("transmission","stop");
-		} else if ($(this).val() === 0) {
+		} else if ($(this).val() === "0") {
 			$("[name='service']:eq(0)").removeClass('btn-danger');
 			$("[name='service']:eq(1)").addClass('btn-success').text('starting...').addClass('disabled');
 			setServiceStatus("transmission","start");

@@ -4,6 +4,7 @@ var	exec = require('child_process').exec,
 
 module.exports = function(appSettings){
 	this.driveUsage = function(callback) {
+		var system = this;
 		exec("df -h", function(error, stdout, stderr){
 			if (error !== null) {
 				console.log('exec error: ' + error);
@@ -11,7 +12,7 @@ module.exports = function(appSettings){
 				callback({"err" : "Disk usage could not be retrieved."}, null);
 				return;
 			}
-			this.formatDriveUsage(stdout, function(err, drive_usage){
+			system.formatDriveUsage(stdout, function(err, drive_usage){
 				if (err) {
 					//res.json(500, {"err" : "Disk usage could not be retrieved."});
 					callback({"err" : "Disk usage could not be retrieved."}, null);
@@ -215,7 +216,7 @@ module.exports = function(appSettings){
 
 		d.run(function(){
 			exec("sudo /etc/init.d/" + serviceName + " " + status, function(error, stdout, stderr){
-				if (error !== null) {
+				if (status != "status" && error !== null) {
 					console.log('exec error: ' + error.stack);
 					if (callback)
 						callback({"err" : "Service status could not be " + (status == "start" ? "started" : "stopped") +"."});
