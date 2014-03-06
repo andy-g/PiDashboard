@@ -18,6 +18,8 @@ var app = express();
 app.use(express.bodyParser());
 app.use(express.static(__dirname + '/public'));
 
+var system = new System(appSettings);
+
 //-----routes-----
 routes(app, appSettings);
 
@@ -59,14 +61,13 @@ if (appSettings.twitter.enableTwitterBot){
 			
 			//--Retrieve Current public IP Address
 			if (data.direct_message.text.match(/IP Address/gi) !== null){
-				request(
-					{ uri: 'http://checkip.dyndns.com/' },
-					function(err, response, body){
-						if (err){ console.log(err);	} else {
-							twitterBot.SendDirectMessage('My IP Address is ' + body.match(/[0-9]+(?:\.[0-9]+){3}/)[0], data.direct_message.sender_screen_name);
-						}
+				system.getIpAddress(function(err, ipAddress){
+					if (err){
+						twitterBot.SendDirectMessage('IP address could not be retrieved.');
+					} else {
+						twitterBot.SendDirectMessage('My IP Address is ' + ipAddress, data.direct_message.sender_screen_name);
 					}
-				);
+				});
 			} 
 
 			//--Queue or Dowload Torrent(s)
@@ -110,3 +111,22 @@ if (appSettings.rss.enableRssListener){
 	});
 	rssListener.RssCheck();
 }
+
+//Send notifications that the PiDashboard is now up
+system.getIpAddress(function(err, ipAddress){
+	if (err){
+		if (appSettings.twitter.enableTwitterBot){
+			twitterBot.SendDirectMessage('PiDashboard is up! IP address could not be retrieved.');
+		}
+		if (appSettings.pushCo.enabled){
+			system.sendPushCoNotification('PiDashboard is up! IP address could not be retrieved.');
+		}
+	} else {
+		if (appSettings.twitter.enableTwitterBot){
+			twitterBot.SendDirectMessage('PiDashboard is up! IP Address is ' + ipAddress, appSettings.twitter.defaultRecipient);
+		}
+		if (appSettings.pushCo.enabled){
+			system.sendPushCoNotification('PiDashboard is up! IP Address is ' + ipAddress);
+		}
+	}
+});

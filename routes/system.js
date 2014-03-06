@@ -229,4 +229,30 @@ module.exports = function(appSettings){
 			});
 		});
 	};
+
+	this.getIpAddress = function(callback){
+		request(
+			{ uri: 'http://checkip.dyndns.com/' },
+			function(err, response, body){
+				if (err){ 
+					console.log(err);	
+					callback(err, null);
+				} else {
+					var ipAddress = body.match(/[0-9]+(?:\.[0-9]+){3}/)[0];
+					callback(null, ipAddress);
+				}
+			}
+		);
+	};
+
+	this.sendPushCoNotification = function(message){
+		request.post({ 
+				uri: 'https://api.push.co/1.0/push',
+				form: { api_key: appSettings.pushCo.keys.api_key, api_secret: appSettings.pushCo.keys.api_secret, message: message }
+			},
+			function(err, response, body){
+				if (err){ console.log(err);	}
+			}
+		);
+	};
 };

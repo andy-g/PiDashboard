@@ -39,5 +39,12 @@
 		],
 		"username": "transmission-username",
 		"password": "transmission-password"
+	},
+	"pushCo":{
+		"enabled": true,
+		"keys": {
+			"api_key": "push.co api_key",
+			"api_secret": "push.co api_secret"
+		}
 	}
 }
