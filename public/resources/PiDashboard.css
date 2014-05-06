@@ -392,3 +392,8 @@ button {
 .icon-white {
   background-image: url("glyphicons-halflings-white.png");
 }
+
+.bs-docs-example {
+  clear:both;
+  margin-top:8px;
+}

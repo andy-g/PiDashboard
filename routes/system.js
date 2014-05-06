@@ -225,7 +225,7 @@ module.exports = function(appSettings){
 
 				//If we're setting the status, just return what we've set it to (return can come back before service status is changed), otherwise verify output to determine service status
 				if (callback)
-					callback({ service: serviceName, status: (status == "status" ? (stdout.indexOf(serviceName + " is running") > -1) : (status == "start")) });
+					callback({ service: serviceName, status: (status == "status" ? (stdout.indexOf(" is running") > -1) : (status == "start")) });
 			});
 		});
 	};

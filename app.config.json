@@ -19,6 +19,16 @@
 			"serviceName": "transmission-daemon",
 			"startSchedule": { "hour": 23, "minute": 5 },
 			"endSchedule": { "hour": 4, "minute": 55 }
+		},
+		"sabnzbd": {
+			"serviceName": "sabnzbdplus",
+			"startSchedule": { "hour": 0, "minute": 5 },
+			"endSchedule": { "hour": 7, "minute": 0 }
+		},
+		"sickbeard": {
+			"serviceName": "sickbeard",
+			"startSchedule": { "hour": 0, "minute": 10 },
+			"endSchedule": { "hour": 7, "minute": 5 }
 		}
 	},
 	"twitter": {

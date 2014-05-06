@@ -50,8 +50,8 @@ function ContentHandler (appSettings) {
 				delete service.jobs;
 			} 
 			if (req.param('isScheduled') === 'true' && service.startSchedule && service.endSchedule){
-				var serviceStart = schedule.scheduleJob(service.serviceName + '-start', service.startSchedule, function(){ execService(service.serviceName, 'start'); });
-				var serviceStop  = schedule.scheduleJob(service.serviceName + '-stop', service.endSchedule,   function(){ execService(service.serviceName, 'stop'); });
+				var serviceStart = schedule.scheduleJob(service.serviceName + '-start', service.startSchedule, function(){ system.execService(service.serviceName, 'start'); });
+				var serviceStop  = schedule.scheduleJob(service.serviceName + '-stop', service.endSchedule,   function(){ system.execService(service.serviceName, 'stop'); });
 				service.jobs = [serviceStart, serviceStop];
 
 				//if it's currently after startSchedule and before endSchedule, set status = "start"
@@ -69,6 +69,7 @@ function ContentHandler (appSettings) {
 		system.execService(service.serviceName, status, function(output){ 
 			if (!output.err) {
 				output.isScheduled = isScheduled;
+				output.alias = req.param('service');
 				res.json(output);
 			} else {
 				res.json(500, output);

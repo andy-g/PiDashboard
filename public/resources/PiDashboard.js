@@ -4,6 +4,8 @@ window.onload=function(){
 	getUsage();
 	getDriveUsage();
 	setServiceStatus("transmission");
+	setServiceStatus("sabnzbd");
+	setServiceStatus("sickbeard");
 	document.getElementById("refresh").onclick = function(){ 
 		this.style.display = 'none';
 		getUsage();
@@ -30,17 +32,18 @@ window.onload=function(){
 			//console.log("don't click on the active button!!");
 			return;
 		}
+
 		if ($(this).val() == 1) {
-			$("[name='service']:eq(0)").addClass('btn-danger').text('stopping...').addClass('disabled');
-			$("[name='service']:eq(1)").removeClass('btn-success');
-			setServiceStatus("transmission","stop");
+			$("[data-service='"+this.dataset.service+"']:eq(0)").addClass('btn-danger').text('stopping...').addClass('disabled');
+			$("[data-service='"+this.dataset.service+"']:eq(1)").removeClass('btn-success');
+			setServiceStatus(this.dataset.service,"stop");
 		} else if ($(this).val() === "0") {
-			$("[name='service']:eq(0)").removeClass('btn-danger');
-			$("[name='service']:eq(1)").addClass('btn-success').text('starting...').addClass('disabled');
-			setServiceStatus("transmission","start");
+			$("[data-service='"+this.dataset.service+"']:eq(0)").removeClass('btn-danger');
+			$("[data-service='"+this.dataset.service+"']:eq(1)").addClass('btn-success').text('starting...').addClass('disabled');
+			setServiceStatus(this.dataset.service,"start");
 		} else if ($(this).val() == 2) {
-			$("[name='service']:eq(2)").addClass('disabled');
-			setServiceStatus("transmission", undefined, !$(this).hasClass('active'));
+			$("[data-service='"+this.dataset.service+"']:eq(2)").addClass('disabled');
+			setServiceStatus(this.dataset.service, undefined, !$(this).hasClass('active'));
 		}
 	});
 };
@@ -53,19 +56,19 @@ function setServiceStatus(service, status, isScheduled) {
 		data.isScheduled = isScheduled;
 
 	$.ajax({type: "PUT", dataType: "json", url: window.location.protocol + "//" + window.location.host +'/services', data: data}).always(function(data){
-		$("[name='service']:eq(0)").removeClass('btn-danger').text('stop').removeClass('disabled').removeClass('active');
-		$("[name='service']:eq(1)").removeClass('btn-success').text('start').removeClass('disabled').removeClass('active');
-		$("[name='service']:eq(2)").removeClass('active').removeClass('disabled');
+		$("[data-service='"+data.alias+"']:eq(0)").removeClass('btn-danger').text('stop').removeClass('disabled').removeClass('active');
+		$("[data-service='"+data.alias+"']:eq(1)").removeClass('btn-success').text('start').removeClass('disabled').removeClass('active');
+		$("[data-service='"+data.alias+"']:eq(2)").removeClass('active').removeClass('disabled');
 
 		if(data.status === true)
-			$("[name='service']:eq(1)").addClass('btn-success').text('started').addClass('active');
+			$("[data-service='"+data.alias+"']:eq(1)").addClass('btn-success').text('started').addClass('active');
 		else if (data.status === false)
-			$("[name='service']:eq(0)").addClass('btn-danger').text('stopped').addClass('active');
+			$("[data-service='"+data.alias+"']:eq(0)").addClass('btn-danger').text('stopped').addClass('active');
 
 		if (data.isScheduled === true)
-			$("[name='service']:eq(2)").addClass('active');
+			$("[data-service='"+data.alias+"']:eq(2)").addClass('active');
 		else
-			$("[name='service']:eq(2)").removeClass('active');
+			$("[data-service='"+data.alias+"']:eq(2)").removeClass('active');
 	});
 }
 
