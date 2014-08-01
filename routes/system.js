@@ -1,6 +1,7 @@
 var	exec = require('child_process').exec,
 	request = require('request'),
-	fs = require('fs');
+	fs = require('fs'),
+	formatHelper = require('./formatHelper');
 
 module.exports = function(appSettings){
 	this.driveUsage = function(callback) {
