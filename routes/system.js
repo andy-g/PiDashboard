@@ -47,11 +47,9 @@ module.exports = function(appSettings){
 				if (err){
 					callback( { msg: "getCurrentUsage: No response body.", "error": err } );
 				} else {
-					//Iterate through current usage stats for each device
-					var mac_row_collection = body.match(/"(?:[0-9]{1,3}\.){3}[0-9]{1,3}.*(?=,)/gi);
-					for (var i = 0; i < mac_row_collection.length; i++){
-						var row_array = mac_row_collection[i].replace(/(\s|")/g,'').split(',');
-						current_usage.stats[i] = {"ip_add" : row_array[0], "mac_add" : row_array[1], "device_name" : (appSettings.namedDevices[row_array[1]] || "unknown"), "total_bytes" : parseInt(row_array[3]) };
+					var devices = JSON.parse(body).devices;
+					for (var i = 0; i < devices.length; i++){
+						current_usage.stats[i] = {"ip_add" : devices[i].ip, "mac_add" : devices[i].mac.replace(/:/g,"-").toUpperCase(),"device_name" : (appSettings.namedDevices[devices[i].mac.replace(/:/g,"-").toUpperCase()] || "unknown"), "total_bytes" : parseInt(devices[i].in + devices[i].out) };
 					}
 					callback(err, current_usage);
 				}

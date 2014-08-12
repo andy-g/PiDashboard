@@ -1,5 +1,5 @@
 {
-	"routerStatsUri": "http://admin:admin@192.168.1.1/userRpm/SystemStatisticRpm.htm?Num_per_page=20",
+	"routerStatsUri": "http://192.168.0.1/cgi-bin/usage_json",
 	"usageHistoryPath": "usage_history.json",
 	"namedDevices": {
 		"192.168.1.100": "Device1",
