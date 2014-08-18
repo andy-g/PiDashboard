@@ -72,7 +72,16 @@ module.exports = function(appSettings){
 	// Get the historic usage and merge in the current usage
 	this.getMergedUsage = function(previous_period, reset, callback){
 		system.getNetworkUsageHistory(function (err, historic_usage) {
+			if (err && ! historic_usage){
+				callback(err);
+				return;
+			}
+
 			system.getCurrentNetworkUsage(reset, function(err, current_usage){
+				if (err && ! current_usage){
+					callback(err);
+					return;
+				}
 				var _now = new Date(current_usage.date);
 				var _today = new Date(new Date(_now).setHours(0,0,0,0));
 
@@ -112,6 +121,11 @@ module.exports = function(appSettings){
 
 	this.saveCurrentNetworkUsage = function(callback){
 		system.getMergedUsage(true, true, function(err, usage){
+			if (err && ! usage){
+				system.log("saveCurrentNetworkUsage Error: " + JSON.stringify(err));
+				return;
+			}
+
 			var _now = new Date();
 
 			//If we're logging for the first day of the month, backup the current file with a _YYYYMM suffix, eg: usage_history_201306.json
@@ -138,6 +152,11 @@ module.exports = function(appSettings){
 
 	this.getUsageSummary = function(runDate, callback){
 		system.getMergedUsage(false, true, function(err, usage){
+			if (err && ! usage) {
+				system.log("getUsageSummary Error: " + JSON.stringify(err));
+				return;
+			}
+
 			var summary = { "date": runDate.valueOf(), "devices": {} };
 
 			function populateByPeriod(timePeriod){
@@ -199,7 +218,7 @@ module.exports = function(appSettings){
 		});
 
 		d.run(function(){
-			exec("/etc/init.d/" + serviceName + " " + status, function(error, stdout, stderr){
+			exec("sudo /etc/init.d/" + serviceName + " " + status, function(error, stdout, stderr){
 				if (status != "status" && error !== null) {
 					system.log('exec error: ' + error.stack);
 					if (callback)
