@@ -84,7 +84,7 @@ function getUsage(date) {
 		window.clearTimeout(abortTimerId);
 
 		//Handle any handled errors
-		if (data.err && !data.stats){
+		if (data.err && !data.devices){
 			handleError(data.err);
 			return;
 		}
@@ -104,8 +104,8 @@ function getUsage(date) {
 		table.tBodies[0].innerHTML = "";
 		var totalbytes = 0,
 			totalbytes_today = 0;
-		data.stats.forEach(function(value, index) {
-			table.tBodies[0].innerHTML += "<tr><td>"+ (value.device_name ? value.device_name : value.mac_add) +"<span class='hover' title='"+ value.ip_add +"\n"+ value.mac_add +"'>&hellip;</span><span class='details'>("+ value.ip_add + ")</span></td><td>"+ formatBytes(value.total_bytes,2) +"</td><td>"+ formatBytes(value.today_bytes,2) +"</td></tr>";
+		data.devices.forEach(function(value, index) {
+			table.tBodies[0].innerHTML += "<tr><td>"+ (value.device_name ? value.device_name : value.mac) +"<span class='hover' title='"+ value.ip +"\n"+ value.mac +"'>&hellip;</span><span class='details'>("+ value.ip + ")</span></td><td>"+ formatBytes(value.total_bytes,2) +"</td><td>"+ formatBytes(value.today_bytes,2) +"</td></tr>";
 			totalbytes += Number(value.total_bytes);
 			if (!isNaN(value.today_bytes)) { 
 				totalbytes_today += Number(value.today_bytes); 

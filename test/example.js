@@ -53,22 +53,23 @@ exports.group = {
 		test.expect(1);
 
 		var appSettings = {
-			"timePeriods":[{ "name": "Night Surfer", "endHour": 5 },{ "name": "Peak", "endHour": 23 },{ "name": "Night Surfer", "endHour": 24 }],
+			"timePeriods":[{"name":"Night Surfer","periods":[{"start":0,"stop":5},{"start":23,"stop":24}]},{"name":"Peak","periods":[{"start":5,"stop":23}]}],
 			"namedDevices": { "00-00-00-00-00-67": "Raspberry Pi" }
 		};
 		
 		var system = new System(appSettings);
-		system.getCurrentNetworkUsage = function(callback){
-			callback(null, JSON.parse('{"date":1393857406320,"stats":[{"ip_add":"192.168.1.150","mac_add":"00-00-00-00-00-67","device_name":"Raspberry Pi","total_bytes":126129},{"ip_add":"192.168.1.111","mac_add":"00-00-00-00-00-9C","device_name":"unknown","total_bytes":289547}]}'));
+		system.getCurrentNetworkUsage = function(reset, callback){
+			callback(null, JSON.parse('{"date":1393943806320,"devices":[{"ip":"192.168.1.150","mac":"00-00-00-00-00-67","total_bytes":100},{"ip":"192.168.1.111","mac":"00-00-00-00-00-9C","total_bytes":200}]}'));
 		};
 		system.getNetworkUsageHistory = function(callback){
-			callback(null, JSON.parse('[{"date":1393852980263,"stats":[{"ip_add":"192.168.1.150","mac_add":"00-00-00-00-00-67","device_name":"Raspberry Pi","total_bytes":126129},{"ip_add":"192.168.1.111","mac_add":"00-00-00-00-00-9C","device_name":"unknown","total_bytes":289547}]},{"date":1393853010249,"stats":[{"ip_add":"192.168.1.150","mac_add":"00-00-00-00-00-67","device_name":"Raspberry Pi","total_bytes":126129},{"ip_add":"192.168.1.111","mac_add":"00-00-00-00-00-9C","device_name":"unknown","total_bytes":289547}]}]'));
+			callback(null, JSON.parse('{"1393797600000":{"devices":{"00-00-00-00-00-67":{"ip":"192.168.1.150","hourly_usage":[0,6]},"00-00-00-00-00-9C":{"ip":"192.168.1.111","hourly_usage":[0,5]}}},"1393884000000":{"devices":{"00-00-00-00-00-67":{"ip":"192.168.1.150","hourly_usage":[0,12]},"00-00-00-00-00-9C":{"ip":"192.168.1.111","hourly_usage":[0,10]}}}}'));
 		};
 
-		system.getUsageSummary(new Date(parseInt(1393857406320)), function(error, data){
-			data.date = 1393857712000;
-			data.stats.sort(function(a,b){ return a.mac_add > b.mac_add; });
-			test.deepEqual(data, JSON.parse('{"date": 1393857712000,"stats": [{"mac_add": "00-00-00-00-00-67","ip_add": "192.168.1.150","device_name": "Raspberry Pi","total_bytes": 126129,"today_bytes": 126129,"usageToDate": {"total": 126129,"Peak": 126129},"usageToday": {"total": 126129,"Peak": 126129}},{"mac_add": "00-00-00-00-00-9C","ip_add": "192.168.1.111","device_name": "unknown","total_bytes": 289547,"today_bytes": 289547,"usageToDate": {"total": 289547,"Peak": 289547},"usageToday": {"total": 289547,"Peak": 289547}}]}', 'Network Usage Summary') );
+		system.getUsageSummary(new Date(parseInt(1393884000000)), function(error, data){
+			data.date = 1393884000000;
+
+			data.devices.sort(function(a,b){ return a.mac_add > b.mac_add; });
+			test.deepEqual(data, JSON.parse('{"date": 1393884000000,"devices": [{"mac": "00-00-00-00-00-67","ip": "192.168.1.150","device_name": "Raspberry Pi","total_bytes": 118,"today_bytes": 112,"usageToDate": {"Night Surfer": 18,"Peak": 100},"usageToday": {"Night Surfer": 12,"Peak": 100}},{"mac": "00-00-00-00-00-9C","ip": "192.168.1.111","device_name": "unknown","total_bytes": 215,"today_bytes": 210,"usageToDate": {"Night Surfer": 15,"Peak": 200},"usageToday": {"Night Surfer": 10,"Peak": 200}}]}', 'Network Usage Summary') );
 			test.done();
 		});
 	}

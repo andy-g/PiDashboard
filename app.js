@@ -32,23 +32,19 @@ routes(app, appSettings);
 //};
 //https.createServer(options, app).listen(8080);//(443);
 app.listen(8080);
-console.log('Listening on 8080');
+system.log('Listening on 8080');
 
 //-----start scheduled tasks
 var rule = new schedule.RecurrenceRule();
-rule.hour = appSettings.timePeriods.map(function(element){ 
-	return element.endHour % 24; 
-});
 rule.minute = 0;
 
 var j = schedule.scheduleJob('network usage log',rule, function(){
-	var system = new System(appSettings);
-	console.log(new Date().toJSON() + " Scheduled Job Starting: ");
+	system.log("Retrieving hourly usage: ");
 	system.saveCurrentNetworkUsage(function(message){
-		console.log(message);
+		system.log(message);
 	});
 });
-console.log(new Date().toJSON() + ' Scheduled job started for time periods (hours of day): ' + rule.hour);
+system.log('Scheduled hourly job for logging usage');
 
 //-----listen for direct messages
 if (appSettings.twitter.enableTwitterBot){
@@ -56,9 +52,9 @@ if (appSettings.twitter.enableTwitterBot){
 	var twitterBot = new TwitterBot(appSettings);
 
 	twitterBot.on('tweet',function(data){
-		console.log('Tweet event received');
+		system.log('Tweet event received');
 		if (data.direct_message && data.direct_message.sender_screen_name != 'PiTweetBot'){
-			console.log(new Date().toJSON() + ' new tweet event handler: ' + data.direct_message.text);
+			system.log('New tweet event handler: ' + data.direct_message.text);
 			
 			//--Retrieve Current public IP Address
 			if (data.direct_message.text.match(/IP Address/gi) !== null){
@@ -87,7 +83,7 @@ if (appSettings.rss.enableRssListener){
 	var rssListener = new RssListener(appSettings);
 
 	rssListener.on('newTorrents',function(data){
-		console.log(new Date().toJSON() + " New torrent event");
+		system.log("New torrent event");
 		if (appSettings.twitter.enableTwitterBot){
 			twitterBot.SendDirectMessage("Adding" +
 				data.reduce(function(prev, curr){ 
@@ -102,11 +98,11 @@ if (appSettings.rss.enableRssListener){
 	});
 	rssListener.on('torrentAdded',function(data){
 		if (data.status){
-			console.log(new Date().toJSON() + " Torrent(s) successfuly queued" + (data.error ? " (" + data.error + ")" : ""));
+			system.log("Torrent(s) successfuly queued" + (data.error ? " (" + data.error + ")" : ""));
 			twitterBot.SendDirectMessage("Torrent(s) successfully queued" + (data.error ? " (" + data.error + ")" : ""));
 		} else {
-			console.log(new Date().toJSON() + " Torrent(s) not successfuly added");
-			console.log(data.error);
+			system.log("Torrent(s) not successfuly added");
+			system.log(data.error);
 			twitterBot.SendDirectMessage("Torrent(s) not successfully added" + (data.error ? " (" + data.error + ")" : ""));
 		}
 	});
@@ -116,18 +112,14 @@ if (appSettings.rss.enableRssListener){
 //Send notifications that the PiDashboard is now up
 system.getIpAddress(function(err, ipAddress){
 	if (err){
+		system.sendPushNotification('PiDashboard is up! IP address could not be retrieved.');
 		if (appSettings.twitter.enableTwitterBot){
 			twitterBot.SendDirectMessage('PiDashboard is up! IP address could not be retrieved.');
 		}
-		if (appSettings.pushCo.enabled){
-			system.sendPushCoNotification('PiDashboard is up! IP address could not be retrieved.');
-		}
 	} else {
+		system.sendPushNotification('PiDashboard is up! IP Address is ' + ipAddress);
 		if (appSettings.twitter.enableTwitterBot){
-			twitterBot.SendDirectMessage('PiDashboard is up! IP Address is ' + ipAddress, appSettings.twitter.defaultRecipient);
-		}
-		if (appSettings.pushCo.enabled){
-			system.sendPushCoNotification('PiDashboard is up! IP Address is ' + ipAddress);
+			twitterBot.SendDirectMessage('PiDashboard is up! IP Address is ' + ipAddress);
 		}
 	}
 });
