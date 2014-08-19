@@ -53,7 +53,7 @@ module.exports = function(appSettings){
 						current_usage.devices.push({
 							"ip": device.ip,
 							"mac": device.mac.toUpperCase(),
-							"total_bytes": parseInt(device.in + device.out)
+							"total_bytes": parseInt(device.in) + parseInt(device.out)
 						});
 					});
 					callback(err, current_usage);
@@ -151,7 +151,7 @@ module.exports = function(appSettings){
 	};
 
 	this.getUsageSummary = function(runDate, callback){
-		system.getMergedUsage(false, true, function(err, usage){
+		system.getMergedUsage(false, false, function(err, usage){
 			if (err && ! usage) {
 				system.log("getUsageSummary Error: " + JSON.stringify(err));
 				return;
