@@ -6,9 +6,8 @@
 		"192.168.1.101": "Device2"
 	},
 	"timePeriods":[
-		{ "name": "Night Surfer", "endHour": 5 },
-		{ "name": "Peak", "endHour": 23 },
-		{ "name": "Night Surfer", "endHour": 24 }
+		{ "name": "Night Surfer", "periods": [ { "start": 0,"stop": 5 }, { "start": 23, "stop": 24 } ] },
+		{ "name": "Peak", "periods": [ {"start": 5, "stop": 23} ] }
 	],
 	"dataAllocations":[
 		{ "name": "Night Surfer", "description": "Data available between 23:00 and 5:00", "bytes": 10737418240 },
@@ -56,5 +55,10 @@
 			"api_key": "push.co api_key",
 			"api_secret": "push.co api_secret"
 		}
+	},
+	"boxcar2":{
+		"enabled": false,
+		"access_token": "BOXCAR ACCESS TOKEN",
+		"notification_icon": "https://raw.githubusercontent.com/andy-g/PiDashboard/master/public/favicon.png"
 	}
 }
