@@ -83,11 +83,12 @@ module.exports = function(appSettings){
 					return;
 				}
 				var _now = new Date(current_usage.date);
-				var _today = new Date(new Date(_now).setHours(0,0,0,0));
 
 				// If this is an adhoc call (not on the hour), include current usage for current hours, not previous hour
 				if ( ! previous_period)
 					_now.setHours(_now.getHours()+1);
+
+				var _today = new Date(new Date(_now).setHours(0,0,0,0));
 
 				// Retrieve or create entry for today (or yesterday if the hour is 0), and set the usage for each device
 				var hour = _now.getHours();
