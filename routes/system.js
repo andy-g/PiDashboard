@@ -210,6 +210,22 @@ module.exports = function(appSettings){
 		});
 	};
 
+	this.getGraphData = function(runDate, callback){
+		system.getMergedUsage(false, false, function(err, usage){
+			var json = [];
+			var dayUsage = usage[runDate.setHours(0,0,0,0)];
+			for (var mac in dayUsage.devices) {
+				var item = { "key": appSettings.namedDevices[mac] || "unknown",	"values": [] };
+				dayUsage.devices[mac].hourly_usage.forEach(function(bytes, index){
+					item.values.push({ "x": index, "y": bytes});
+				});
+				json.push(item);
+			}
+
+			callback(null, json);
+		});
+	};
+
 	this.execService = function(serviceName, status, callback){
 		var d = require('domain').create();
 		d.on('error', function(err){
