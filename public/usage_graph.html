@@ -9,7 +9,11 @@
 	<script type="text/javascript" src="http://nvd3.org/assets/js/nv.d3.js"></script>
 	<link rel="stylesheet" type="text/css" href="http://nvd3.org/assets/css/nv.d3.css"/>
 	<script type="text/javascript">
-		d3.json("/graph_data/", function(json) {
+		function loadPageVar(sVar) {
+			return decodeURI(window.location.search.replace(new RegExp("^(?:.*[&\\?]" + encodeURI(sVar).replace(/[\.\+\*]/g, "\\$&") + "(?:\\=([^&]*))?)?.*$", "i"), "$1"));
+		}
+
+		function populateGraph(json){
 			nv.addGraph(function() {
 				var chart = nv.models.lineChart().interpolate("monotone");
 
@@ -33,13 +37,16 @@
 
 				return chart;
 			});
-
-		});
+		}
 
 		function padNumber(number, pad) {
 			var N = Math.pow(10, pad);
 			return number < N ? ("" + (N + number)).slice(1) : "" + number;
 		};
+
+		d3.json("/graph_data/"+loadPageVar("date"), function(json) {
+			populateGraph(json)
+		});
 	</script>
 	<style>
 		html, body {
