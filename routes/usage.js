@@ -22,6 +22,18 @@ function ContentHandler (appSettings) {
 		});
 	};
 
+	this.graphData = function(req, res) {
+		var runDate = !req.param('runDate') ? new Date() : new Date(parseInt(req.param('runDate')));
+
+		res.header("Access-Control-Allow-Origin", "*");
+		system.getGraphData(runDate, function(error, data){
+			if (!data || error)
+				res.json(500, {"err" : "Graph data could not be retrieved"});
+			else
+				res.json(data);
+		});
+	};
+
 	this.drives = function(req, res) {
 		res.header("Access-Control-Allow-Origin", "*");
 		system.driveUsage(function(error, data){

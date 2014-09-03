@@ -8,6 +8,7 @@ module.exports = exports = function(app, appSettings) {
 
 	app.get('/', function(req, res){ res.send('hello world'); });
 	app.get('/summary/:runDate?', contentHandler.usageSummary);
+	app.get('/graph_data/:runDate?', contentHandler.graphData);
 	app.get('/drives', contentHandler.drives);
 	app.get('/services/:service?/:status?', contentHandler.serviceStatus);
 	app.put('/services/:service?/:status?', contentHandler.serviceStatus);

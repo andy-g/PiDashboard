@@ -13,6 +13,7 @@
           module: true,
           require: true
         },
+        loopfunc:true
       },
       main: ['gruntfile.js', 'test/**/*.js', 'public/resources/PiDashboard.js', 'app.js', 'routes/*.js']
     });

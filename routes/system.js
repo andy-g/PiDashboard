@@ -131,7 +131,7 @@ module.exports = function(appSettings){
 
 			//If we're logging for the first day of the month, backup the current file with a _YYYYMM suffix, eg: usage_history_201306.json
 			if (_now.getDate() == 1 && _now.getHours() === 1){
-				var _yesterday = new Date(_today.setDate(_today.getDate()-1));
+				var _yesterday = new Date(_now.setDate(_now.getDate()-1));
 				fs.renameSync(
 					appSettings.usageHistoryPath,
 					appSettings.usageHistoryPath.replace(".json","_" + _yesterday.getFullYear() + formatHelper.padNumber(_yesterday.getMonth() + 1, 2) + ".json")
@@ -167,9 +167,9 @@ module.exports = function(appSettings){
 					summary.devices[mac].usageToday[timePeriod.name] = 0;
 
 				timePeriod.periods.forEach(function(period){
-					_usage_in_period = usage[day].devices[mac].hourly_usage.slice(period.start, period.stop + 1);
+					_usage_in_period = usage[day].devices[mac].hourly_usage.slice(period.start + 1, period.stop + 1);
 					if (_usage_in_period.length > 0){
-						usage[day].devices[mac].hourly_usage.slice(period.start, period.stop + 1).forEach(function(hour_usage){
+						usage[day].devices[mac].hourly_usage.slice(period.start + 1, period.stop + 1).forEach(function(hour_usage){
 							summary.devices[mac].usageToDate[timePeriod.name] += hour_usage;
 							summary.devices[mac].total_bytes += hour_usage;
 							if (is_rundate){
@@ -208,6 +208,22 @@ module.exports = function(appSettings){
 			summary.devices = device_array;
 
 			callback(null, summary);
+		});
+	};
+
+	this.getGraphData = function(runDate, callback){
+		system.getMergedUsage(false, false, function(err, usage){
+			var json = [];
+			var dayUsage = usage[runDate.setHours(0,0,0,0)];
+			for (var mac in dayUsage.devices) {
+				var item = { "key": appSettings.namedDevices[mac] || "unknown",	"values": [] };
+				dayUsage.devices[mac].hourly_usage.forEach(function(bytes, index){
+					item.values.push({ "x": index, "y": bytes});
+				});
+				json.push(item);
+			}
+
+			callback(null, json);
 		});
 	};
 
