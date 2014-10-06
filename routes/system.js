@@ -99,7 +99,7 @@ module.exports = function(appSettings){
 
 				//If we're logging for the first day of the month, don't include previous data
 				if (_now.getDate() == 1 && hour === 1)
-					historic_usage = [];
+					historic_usage = {};
 
 				var today_usage = historic_usage[_today.valueOf()] || (historic_usage[_today.valueOf()] = { "devices": {} });
 				current_usage.devices.forEach(function(device){
