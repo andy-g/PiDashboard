@@ -102,8 +102,10 @@ function getUsage(date) {
 		var table = document.getElementById("table");
 
 		table.tBodies[0].innerHTML = "";
-		var totalbytes = 0,
-			totalbytes_today = 0;
+		var totalbytes = 0, totalbytes_today = 0;
+		data.devices.sort(function(a,b){
+			return b.today_bytes - a.today_bytes;
+		});
 		data.devices.forEach(function(value, index) {
 			table.tBodies[0].innerHTML += "<tr><td>"+ (value.device_name ? value.device_name : value.mac) +"<span class='hover' title='"+ value.ip +"\n"+ value.mac +"'>&hellip;</span><span class='details'>("+ value.ip + ")</span></td><td>"+ formatBytes(value.total_bytes,2) +"</td><td>"+ formatBytes(value.today_bytes,2) +"</td></tr>";
 			totalbytes += Number(value.total_bytes);
