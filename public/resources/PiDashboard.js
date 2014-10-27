@@ -34,15 +34,15 @@ window.onload=function(){
 		}
 
 		if ($(this).val() == 1) {
-			$("[data-service='"+this.dataset.service+"']:eq(0)").addClass('btn-danger').text('stopping...').addClass('disabled');
-			$("[data-service='"+this.dataset.service+"']:eq(1)").removeClass('btn-success');
+			$($("[data-service='"+this.dataset.service+"']")[0]).addClass('btn-danger').text('stopping...').addClass('disabled');
+			$($("[data-service='"+this.dataset.service+"']")[1]).removeClass('btn-success');
 			setServiceStatus(this.dataset.service,"stop");
 		} else if ($(this).val() === "0") {
-			$("[data-service='"+this.dataset.service+"']:eq(0)").removeClass('btn-danger');
-			$("[data-service='"+this.dataset.service+"']:eq(1)").addClass('btn-success').text('starting...').addClass('disabled');
+			$($("[data-service='"+this.dataset.service+"']")[0]).removeClass('btn-danger');
+			$($("[data-service='"+this.dataset.service+"']")[1]).addClass('btn-success').text('starting...').addClass('disabled');
 			setServiceStatus(this.dataset.service,"start");
 		} else if ($(this).val() == 2) {
-			$("[data-service='"+this.dataset.service+"']:eq(2)").addClass('disabled');
+			$($("[data-service='"+this.dataset.service+"']")[2]).addClass('disabled');
 			setServiceStatus(this.dataset.service, undefined, !$(this).hasClass('active'));
 		}
 	});
