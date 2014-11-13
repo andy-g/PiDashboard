@@ -1,5 +1,4 @@
 image: my_node_test
-
 script:
   - echo 'Africa/Johannesburg' | sudo tee /etc/timezone
   - sudo dpkg-reconfigure --frontend noninteractive tzdata
@@ -7,3 +6,9 @@ script:
   - cd /var/cache/drone/src/github.com/andy-g/PiDashboard
   - npm install
   - grunt
+notify:
+  email:
+    recipients:
+      - andy@ignitionroom.com
+    on_success: true
+    on_failure: true
