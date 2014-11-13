@@ -1,0 +1,6 @@
+image: my_node_test
+script:
+  - echo 'Africa/Johannesburg' | sudo tee /etc/timezone
+  - sudo dpkg-reconfigure --frontend noninteractive tzdata
+  - npm install -g grunt-cli
+  - grunt
