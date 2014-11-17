@@ -13,7 +13,7 @@ notify:
     on_success: true
     on_failure: true
 cache:
-  - .npm
+  - /.npm
   #- /usr/local/lib/node_modules
   # gitter:
   #   room_id: 06821336092b9a52c252
