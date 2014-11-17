@@ -12,6 +12,9 @@ notify:
       - andy@ignitionroom.com
     on_success: true
     on_failure: true
+cache:
+  - .npm
+  #- /usr/local/lib/node_modules
   # gitter:
   #   room_id: 06821336092b9a52c252
   #   token: 20f6d881dbd52dbd6087
