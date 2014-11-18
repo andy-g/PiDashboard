@@ -13,8 +13,8 @@ notify:
     on_success: false
     on_failure: true
 cache:
-  - ~/.npm
-  
+  - /root/.npm
+
   #- /tmp/npm-0/.npm
   
   #- /usr/local/lib/node_modules
