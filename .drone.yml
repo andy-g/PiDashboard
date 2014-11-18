@@ -13,7 +13,8 @@ notify:
     on_success: false
     on_failure: true
 cache:
-  - /tmp/npm-0/.npm
+  - ~/.npm
+  #- /tmp/npm-0/.npm
   
   #- /usr/local/lib/node_modules
   # gitter:
