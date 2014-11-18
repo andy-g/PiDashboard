@@ -10,10 +10,10 @@ notify:
   email:
     recipients:
       - andy@ignitionroom.com
-    on_success: true
+    on_success: false
     on_failure: true
 cache:
-  - /.npm
+  - /tmp/npm-0/.npm
   
   #- /usr/local/lib/node_modules
   # gitter:
