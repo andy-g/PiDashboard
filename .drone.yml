@@ -14,7 +14,6 @@ notify:
     on_failure: true
 cache:
   - /root/.npm
-
   #- /tmp/npm-0/.npm
   
   #- /usr/local/lib/node_modules
