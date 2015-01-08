@@ -2,9 +2,9 @@ image: andyg/nodejs-ci
 script:
   - echo 'Africa/Johannesburg' | sudo tee /etc/timezone
   - sudo dpkg-reconfigure --frontend noninteractive tzdata
-  - npm install --verbose -g grunt-cli
+  - npm install -g grunt-cli
   - cd /var/cache/drone/src/github.com/andy-g/PiDashboard
-  - npm install --verbose
+  - npm install
   - grunt
 notify:
   email:
