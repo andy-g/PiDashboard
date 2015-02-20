@@ -228,6 +228,9 @@ module.exports = function(appSettings){
 	};
 
 	this.execService = function(serviceName, status, callback){
+		if (status != "status")
+			console.log("execService service: " + status + "ing" + serviceName);
+
 		var d = require('domain').create();
 		d.on('error', function(err){
 			system.log('Exec Service Error:');
@@ -235,7 +238,13 @@ module.exports = function(appSettings){
 		});
 
 		d.run(function(){
-			exec("sudo /etc/init.d/" + serviceName + " " + status, function(error, stdout, stderr){
+			var cmd = '';
+			if (serviceName == 'kodi')
+				cmd = "sudo initctl " + status + " " + serviceName;
+			else
+				cmd = "sudo /etc/init.d/" + serviceName + " " + status;
+
+			exec(cmd, function(error, stdout, stderr){
 				if (status != "status" && error !== null) {
 					system.log('exec error: ' + error.stack);
 					if (callback)
@@ -245,7 +254,7 @@ module.exports = function(appSettings){
 
 				//If we're setting the status, just return what we've set it to (return can come back before service status is changed), otherwise verify output to determine service status
 				if (callback)
-					callback({ service: serviceName, status: (status == "status" ? (stdout.indexOf(" is running") > -1) : (status == "start")) });
+					callback({ service: serviceName, status: (status == "status" ? (stdout.indexOf("running") > -1) : (status == "start")) });
 			});
 		});
 	};
