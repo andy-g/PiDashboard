@@ -6,6 +6,7 @@ window.onload=function(){
 	setServiceStatus("transmission");
 	setServiceStatus("sabnzbd");
 	setServiceStatus("sickbeard");
+	setServiceStatus("kodi");
 	document.getElementById("refresh").onclick = function(){ 
 		this.style.display = 'none';
 		getUsage();

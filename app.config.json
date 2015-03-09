@@ -16,8 +16,8 @@
 	"services": {
 		"transmission": {
 			"serviceName": "transmission-daemon",
-			"startSchedule": { "hour": 23, "minute": 5 },
-			"endSchedule": { "hour": 4, "minute": 55 }
+			"startSchedule": { "hour": 0, "minute": 5 },
+			"endSchedule": { "hour": 7, "minute": 0 }
 		},
 		"sabnzbd": {
 			"serviceName": "sabnzbdplus",
@@ -28,7 +28,12 @@
 			"serviceName": "sickbeard",
 			"startSchedule": { "hour": 0, "minute": 10 },
 			"endSchedule": { "hour": 7, "minute": 5 }
-		}
+		},
+                "kodi": {
+                        "serviceName": "kodi",
+                        "startSchedule": { "hour": 23, "minute": 50 },
+                        "endSchedule": { "hour": 5, "minute": 5 }
+                }
 	},
 	"twitter": {
 		"enableTwitterBot": true,
@@ -41,7 +46,7 @@
 		"defaultRecipient": "@twitter_user"
 	},
 	"rss": {
-		"enableRssListener": true,
+		"enableRssListener": false,
 		"interval": 7200000,
 		"rssPaths": [
 			"http://path_to_rss_feed"
@@ -50,7 +55,7 @@
 		"password": "transmission-password"
 	},
 	"pushCo":{
-		"enabled": true,
+		"enabled": false,
 		"keys": {
 			"api_key": "push.co api_key",
 			"api_secret": "push.co api_secret"
@@ -62,3 +67,4 @@
 		"notification_icon": "https://raw.githubusercontent.com/andy-g/PiDashboard/master/public/favicon.png"
 	}
 }
+

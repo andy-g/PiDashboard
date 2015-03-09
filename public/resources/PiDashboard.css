@@ -59,6 +59,7 @@ body{
   display:none;
   border-collapse: collapse;
   width: 100%;
+  font-size: 11px;
 }
 
 .table td:first-of-type{
@@ -188,7 +189,7 @@ section {
 }
 
 small {
-  font-size: 85%;
+  font-size: 9.35px;
 }
 
 .muted {

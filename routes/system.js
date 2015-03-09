@@ -211,14 +211,19 @@ module.exports = function(appSettings){
 		});
 	};
 
-	this.getGraphData = function(runDate, callback){
+	this.getGraphData = function(runDate, old, callback){
 		system.getMergedUsage(false, false, function(err, usage){
 			var json = [];
 			var dayUsage = usage[runDate.setHours(0,0,0,0)];
 			for (var mac in dayUsage.devices) {
-				var item = { "key": appSettings.namedDevices[mac] || "unknown",	"values": [] };
+				var item = { "name": appSettings.namedDevices[mac] || "unknown", "data": [] };
+				if (old)
+					item = { "key": appSettings.namedDevices[mac] || "unknown", "values": [] };	
 				dayUsage.devices[mac].hourly_usage.forEach(function(bytes, index){
-					item.values.push({ "x": index, "y": bytes});
+					if (old)
+						item.values.push({ "x": index, "y": bytes});
+					else
+						item.data.push(bytes);
 				});
 				json.push(item);
 			}
@@ -229,7 +234,7 @@ module.exports = function(appSettings){
 
 	this.execService = function(serviceName, status, callback){
 		if (status != "status")
-			console.log("execService service: " + status + "ing" + serviceName);
+			system.log("execService: " + status + "ing " + serviceName);
 
 		var d = require('domain').create();
 		d.on('error', function(err){
@@ -254,7 +259,7 @@ module.exports = function(appSettings){
 
 				//If we're setting the status, just return what we've set it to (return can come back before service status is changed), otherwise verify output to determine service status
 				if (callback)
-					callback({ service: serviceName, status: (status == "status" ? (stdout.indexOf("running") > -1) : (status == "start")) });
+					callback({ service: serviceName, status: (status == "status" ? ((stdout.indexOf(" is running") > -1) || (stdout.indexOf("start/running") > -1)) : (status == "start")) });
 			});
 		});
 	};
