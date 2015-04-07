@@ -108,10 +108,22 @@ function getUsage(date) {
 			return b.today_bytes - a.today_bytes;
 		});
 		data.devices.forEach(function(value, index) {
-			table.tBodies[0].innerHTML += "<tr><td>"+ (value.device_name ? value.device_name : value.mac) +"<span class='hover' title='"+ value.ip +"\n"+ value.mac +"'>&hellip;</span><span class='details'>("+ value.ip + ")</span></td><td>"+ formatBytes(value.total_bytes,2) +"</td><td>"+ formatBytes(value.today_bytes,2) +"</td></tr>";
-			totalbytes += Number(value.total_bytes);
-			if (!isNaN(value.today_bytes)) { 
-				totalbytes_today += Number(value.today_bytes); 
+			var period = loadPageVar("period") ? loadPageVar("period") : 'Peak';
+
+			var device_total_bytes, device_today_bytes;
+			if (period == "Peak" || period == "Night Surfer")
+			{
+				device_total_bytes = value["usageToDate"][period];
+				device_today_bytes = value["usageToday"][period];
+			} else {
+				device_total_bytes = value.total_bytes;
+				device_today_bytes = value.today_bytes;
+			}
+
+			table.tBodies[0].innerHTML += "<tr><td>"+ (value.device_name ? value.device_name : value.mac) +"<span class='hover' title='"+ value.ip +"\n"+ value.mac +"'>&hellip;</span><span class='details'>("+ value.ip + ")</span></td><td>"+ formatBytes(device_total_bytes,2) +"</td><td>"+ formatBytes(device_today_bytes,2) +"</td></tr>";
+			totalbytes += Number(device_total_bytes);
+			if (!isNaN(device_today_bytes)) {
+				totalbytes_today += Number(device_today_bytes);
 			}
 		});
 
@@ -228,4 +240,8 @@ function formatBytes(bytes, precision)
     pwr = Math.min(pwr, units.length - 1);
     bytes /= Math.pow(1024, pwr);
 	return bytes.toFixed(precision) + ' ' + units[pwr];
+}
+
+function loadPageVar(sVar) {
+	return decodeURI(window.location.search.replace(new RegExp("^(?:.*[&\\?]" + encodeURI(sVar).replace(/[\.\+\*]/g, "\\$&") + "(?:\\=([^&]*))?)?.*$", "i"), "$1"));
 }

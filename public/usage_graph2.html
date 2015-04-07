@@ -214,7 +214,7 @@
 		});
 	}
 
-	$.getJSON("/graph_data/?new=1", function( data ){
+	$.getJSON("/graph_data/"+loadPageVar("date")+"?new=1", function( data ){
 	  draw(data);
 	});
 </script>
