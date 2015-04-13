@@ -102,14 +102,17 @@ function getUsage(date) {
 		var container = document.getElementById("container");
 		var table = document.getElementById("table");
 
+		var period = loadPageVar("period") ? loadPageVar("period") : 'Peak';
+
 		table.tBodies[0].innerHTML = "";
 		var totalbytes = 0, totalbytes_today = 0;
 		data.devices.sort(function(a,b){
-			return b.today_bytes - a.today_bytes;
+			if (period == "Peak" || period == "Night Surfer")
+				return b["usageToday"][period] - a["usageToday"][period];
+			else
+				return b.today_bytes - a.today_bytes;
 		});
 		data.devices.forEach(function(value, index) {
-			var period = loadPageVar("period") ? loadPageVar("period") : 'Peak';
-
 			var device_total_bytes, device_today_bytes;
 			if (period == "Peak" || period == "Night Surfer")
 			{
