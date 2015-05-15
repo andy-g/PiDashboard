@@ -8,7 +8,7 @@ module.exports = function(appSettings){
 	var system = this;
 
 	this.driveUsage = function(callback) {
-		exec("df -h", function(error, stdout, stderr){
+		exec("df -h -xtmpfs -xdevtmpfs", function(error, stdout, stderr){
 			if (error !== null) {
 				system.log('exec error: ' + error);
 				//res.json(500, {"err" : "Disk usage could not be retrieved."});
@@ -245,9 +245,9 @@ module.exports = function(appSettings){
 		d.run(function(){
 			var cmd = '';
 			if (serviceName == 'kodi')
-				cmd = "sudo initctl " + status + " " + serviceName;
+				cmd = "sudo systemctl " + status + " mediacenter";
 			else
-				cmd = "sudo /etc/init.d/" + serviceName + " " + status;
+				cmd = "sudo service " + serviceName + " " + status;
 
 			exec(cmd, function(error, stdout, stderr){
 				if (status != "status" && error !== null) {
@@ -259,7 +259,7 @@ module.exports = function(appSettings){
 
 				//If we're setting the status, just return what we've set it to (return can come back before service status is changed), otherwise verify output to determine service status
 				if (callback)
-					callback({ service: serviceName, status: (status == "status" ? ((stdout.indexOf(" is running") > -1) || (stdout.indexOf("start/running") > -1)) : (status == "start")) });
+					callback({ service: serviceName, status: (status == "status" ? ((stdout.indexOf("Active: active (running)") > -1)) : (status == "start")) });
 			});
 		});
 	};
