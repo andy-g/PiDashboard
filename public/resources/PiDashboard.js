@@ -108,7 +108,7 @@ function getUsage(date) {
 		var totalbytes = 0, totalbytes_today = 0;
 		data.devices.sort(function(a,b){
 			if (period == "Peak" || period == "Night Surfer")
-				return b["usageToday"][period] - a["usageToday"][period];
+				return b.usageToday[period] - a.usageToday[period];
 			else
 				return b.today_bytes - a.today_bytes;
 		});
@@ -116,8 +116,8 @@ function getUsage(date) {
 			var device_total_bytes, device_today_bytes;
 			if (period == "Peak" || period == "Night Surfer")
 			{
-				device_total_bytes = value["usageToDate"][period];
-				device_today_bytes = value["usageToday"][period];
+				device_total_bytes = value.usageToDate[period];
+				device_today_bytes = value.usageToday[period];
 			} else {
 				device_total_bytes = value.total_bytes;
 				device_today_bytes = value.today_bytes;
