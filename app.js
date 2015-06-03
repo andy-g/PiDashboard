@@ -40,6 +40,13 @@ var rule = new schedule.RecurrenceRule();
 rule.minute = 0;
 
 var j = schedule.scheduleJob('network usage log',rule, function(){
+	// If were catching up jobs (due to a datetime change), skip previous jobs & only run the last job
+	if (j.nextInvocation() < new Date())
+	{
+		system.log('skipping job');
+		return;
+	}
+
 	system.log("Retrieving hourly usage: ");
 	system.saveCurrentNetworkUsage(function(message){
 		system.log(message);
