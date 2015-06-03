@@ -23,7 +23,7 @@ function ContentHandler (appSettings) {
 	};
 
 	this.graphData = function(req, res) {
-		var runDate = !req.param('runDate') ? new Date() : new Date(parseInt(req.param('runDate')));
+		var runDate = !req.param('runDate') ? new Date() : new Date(isNaN(req.param('runDate')) ? req.param('runDate') : Number(req.param('runDate')));
 
 		res.header("Access-Control-Allow-Origin", "*");
 		system.getGraphData(runDate, !req.param('new'), function(error, data){
