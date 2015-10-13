@@ -2,12 +2,8 @@ language: node_js
 sudo: false
 node_js:
 - '0.11'
-before_script:
-  - echo 'Africa/Johannesburg' | tee /etc/timezone
-  - dpkg-reconfigure --frontend noninteractive tzdata
-before_install: npm install -g grunt-cli
-# env:
-#   global:
-#     - secure: ...
+before_install:
+  - export TZ=Africa/Johannesburg
+  - npm install -g grunt-cli
 after_success:
   - grunt
