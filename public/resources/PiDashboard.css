@@ -264,6 +264,18 @@ hr {
   font-family: 'Helvetica Neue',Helvetica,Arial,sans-serif;
 }
 
+.device button, .service button {
+  width: 82px;
+}
+
+.device.schedulable button, .service.schedulable button {
+  width: 66px;
+}
+
+.device.schedulable button:last-child, .service.schedulable button:last-child {
+  width: 32px;
+}
+
 .btn-group>.btn {
   position: relative;
   /*-webkit-border-radius: 0;*/

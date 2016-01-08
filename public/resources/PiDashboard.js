@@ -2,23 +2,23 @@ var requestTimeout = 1000 * 10;  // 10 seconds
 
 buttons = {
 	services:[
-		{service:"transmission", alias:"Transmission"},
-		{service:"sabnzbd", alias:"SABnzbd+"},
-		{service:"sickbeard", alias:"Sickbeard"},
-		{service:"kodi", alias:"Kodi"},
+		{service:"transmission", alias:"Transmission", schedulable:true},
+		{service:"sabnzbd", alias:"SABnzbd+", schedulable:true},
+		{service:"sickbeard", alias:"Sickbeard", schedulable:true},
+		{service:"kodi", alias:"Kodi", schedulable:false},
 	],
 	devices:[
-		{device: "button",alias: "Lamp"}
+		{device: "button",alias: "Lamp", schedulable:false}
 	]
 }
 
 window.onload=function(){
 	buttons.services.forEach(function(value, index) {
-		$("#services")[0].innerHTML += '<div class="service" data-service="'+value.service+'"><span class="label">'+value.alias+':</span><div class="btn-group" data-toggle="buttons-radio"><button type="button" class="btn btn-mini" style="width:66px" value="1">stop</button><button type="button" class="btn btn-mini"  style="width:66px" value="0">start</button><button type="button" class="btn btn-mini" style="width:32px" value="2"><i class="icon icon-time"></i></button></div></div>';
+		$("#services")[0].innerHTML += '<div class="service'+ (value.schedulable ? ' schedulable' : '') +'" data-service="'+value.service+'"><span class="label">'+value.alias+':</span><div class="btn-group" data-toggle="buttons-radio"><button type="button" class="btn btn-mini" value="1">stop</button><button type="button" class="btn btn-mini" value="0">start</button>' + (value.schedulable ? '<button type="button" class="btn btn-mini" value="2"><i class="icon icon-time"></i></button>' : '') + '</div></div>';
 	});
 
 	buttons.devices.forEach(function(value, index) {
-		$("#devices")[0].innerHTML += '<div class="device" data-device="'+value.device+'"><span class="label">'+value.alias+':</span><div class="btn-group" data-toggle="buttons-radio"><button type="button" class="btn btn-mini" style="width: 82px;" value="1">off</button><button type="button" class="btn btn-mini" style="width: 82px;" value="0">on</button></div></div>';
+		$("#devices")[0].innerHTML += '<div class="device'+ (value.schedulable ? ' schedulable' : '') +'" data-device="'+value.device+'"><span class="label">'+value.alias+':</span><div class="btn-group" data-toggle="buttons-radio"><button type="button" class="btn btn-mini"value="1">off</button><button type="button" class="btn btn-mini" value="0">on</button>' + (value.schedulable ? '<button type="button" class="btn btn-mini" value="2"><i class="icon icon-time"></i></button>' : '') + '</div></div>';
 	});
 
 	getUsage();
