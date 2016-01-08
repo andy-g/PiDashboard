@@ -68,7 +68,7 @@ window.onload=function(){
 			$(buttons[1]).addClass('btn-success').text('starting...').addClass('disabled');
 			setServiceStatus(service,"start");
 		} else if ($(this).val() == 2) {
-			$($buttons[2]).addClass('disabled');
+			$(buttons[2]).addClass('disabled');
 			setServiceStatus(service, undefined, !$(this).hasClass('active'));
 		}
 	});
