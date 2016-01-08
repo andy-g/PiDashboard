@@ -1,7 +1,8 @@
 var 
 	exec = require('child_process').exec,
 	System = require('./system'),
-	schedule = require('node-schedule');
+	schedule = require('node-schedule'),
+	request = require('request');
 
 //var heapdump = require('heapdump');
 function ContentHandler (appSettings) {
@@ -87,6 +88,34 @@ function ContentHandler (appSettings) {
 				res.json(500, output);
 			}
 		});
+	};
+
+	this.deviceStatus = function(req, res) {
+		res.header("Access-Control-Allow-Origin", "*");
+
+		var device = req.param('device');
+		var status = !req.param('status') || !(/on|off/g).test(req.param('status')) ? "status" : req.param('status');
+		
+		if (status != "status" && req.route.method != "put"){
+			res.json(500, {"err" : "Device status could not be set using a get request, please rather use a put request"});
+			return;
+		}
+
+		var device_uri = 'http://192.168.0.100:80' + (status != "status" ? "/" + status : "");
+		request(
+			{uri: device_uri, strictSSL: false},
+			function(err, response, body){
+				if (err){
+					res.json(500, { "err": "getDeviceStatus: No response body." });
+				} else {
+					var device_status = (JSON.parse(body).lampStatus === "On");
+					res.json({
+						"device": device,
+						"status": device_status
+					});
+				}
+			}
+		);
 	};
 }
 

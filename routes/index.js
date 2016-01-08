@@ -12,6 +12,8 @@ module.exports = exports = function(app, appSettings) {
 	app.get('/drives', contentHandler.drives);
 	app.get('/services/:service?/:status?', contentHandler.serviceStatus);
 	app.put('/services/:service?/:status?', contentHandler.serviceStatus);
+	app.get('/devices/:device?/:status?', contentHandler.deviceStatus);
+	app.put('/devices/:device?/:status?', contentHandler.deviceStatus);
 
 	// Error handling middleware
 	//app.use(ErrorHandler);

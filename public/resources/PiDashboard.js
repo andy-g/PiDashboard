@@ -7,6 +7,7 @@ window.onload=function(){
 	setServiceStatus("sabnzbd");
 	setServiceStatus("sickbeard");
 	setServiceStatus("kodi");
+	setDeviceStatus("lamp01");
 	document.getElementById("refresh").onclick = function(){ 
 		this.style.display = 'none';
 		getUsage();
@@ -47,6 +48,23 @@ window.onload=function(){
 			setServiceStatus(this.dataset.service, undefined, !$(this).hasClass('active'));
 		}
 	});
+
+	$("[name='device']").click(function() {
+		if ($(this).val() != 2 && $(this).hasClass('active')){
+			//console.log("don't click on the active button!!");
+			return;
+		}
+
+		if ($(this).val() == 1) {
+			$($("[data-device='"+this.dataset.device+"']")[0]).addClass('btn-danger').text('turning off...').addClass('disabled');
+			$($("[data-device='"+this.dataset.device+"']")[1]).removeClass('btn-success');
+			setDeviceStatus(this.dataset.device,"off");
+		} else if ($(this).val() === "0") {
+			$($("[data-device='"+this.dataset.device+"']")[0]).removeClass('btn-danger');
+			$($("[data-device='"+this.dataset.device+"']")[1]).addClass('btn-success').text('turning on...').addClass('disabled');
+			setDeviceStatus(this.dataset.device,"on");
+		}
+	});
 };
 
 function setServiceStatus(service, status, isScheduled) {
@@ -70,6 +88,22 @@ function setServiceStatus(service, status, isScheduled) {
 			$($("[data-service='"+data.alias+"']")[2]).addClass('active');
 		else
 			$($("[data-service='"+data.alias+"']")[2]).removeClass('active');
+	}});
+}
+
+function setDeviceStatus(device, status) {
+	var data = {"device": device};
+	if (status !== undefined)
+		data.status = status;
+
+	$.ajax({type: "PUT", dataType: "json", url: window.location.protocol + "//" + window.location.host +'/devices', data: data, success: function(data){
+		$($("[data-device='lamp01']")[0]).removeClass('btn-danger').text('off').removeClass('disabled').removeClass('active');
+		$($("[data-device='lamp01']")[1]).removeClass('btn-success').text('on').removeClass('disabled').removeClass('active');
+
+		if(data.status === true)
+			$($("[data-device='lamp01']")[1]).addClass('btn-success').text('on').addClass('active');
+		else if (data.status === false)
+			$($("[data-device='lamp01']")[0]).addClass('btn-danger').text('off').addClass('active');
 	}});
 }
 
