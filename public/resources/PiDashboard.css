@@ -245,15 +245,25 @@ hr {
   border-bottom: 1px solid #ffffff;
 }
 
-.help-inline {
+#devices {
+  margin-top: 15px
+}
+
+.service, .device {
+  clear:both;
+  margin-top:8px;
+}
+
+.device .label, .service .label {
+  color: #595959;
   display: inline-block;
   vertical-align: middle;
   padding-left: 5px;
+  width: 110px;
+  font-size: 13px;
+  font-family: 'Helvetica Neue',Helvetica,Arial,sans-serif;
 }
 
-.help-block, .help-inline {
-  color: #595959;
-}
 .btn-group>.btn {
   position: relative;
   /*-webkit-border-radius: 0;*/
@@ -392,9 +402,4 @@ button {
 
 .icon-white {
   background-image: url("glyphicons-halflings-white.png");
-}
-
-.bs-docs-example {
-  clear:both;
-  margin-top:8px;
 }

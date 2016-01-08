@@ -29,11 +29,11 @@
 			"startSchedule": { "hour": 0, "minute": 10 },
 			"endSchedule": { "hour": 7, "minute": 5 }
 		},
-                "kodi": {
-                        "serviceName": "kodi",
-                        "startSchedule": { "hour": 23, "minute": 50 },
-                        "endSchedule": { "hour": 5, "minute": 5 }
-                }
+		"kodi": {
+			"serviceName": "kodi",
+			"startSchedule": { "hour": 23, "minute": 50 },
+			"endSchedule": { "hour": 5, "minute": 5 }
+		}
 	},
 	"twitter": {
 		"enableTwitterBot": true,
@@ -49,6 +49,11 @@
 		"enabled": false,
 		"access_token": "BOXCAR ACCESS TOKEN",
 		"notification_icon": "https://raw.githubusercontent.com/andy-g/PiDashboard/master/public/favicon.png"
+	},
+	"adafruitio":{
+		"url": "https://io.adafruit.com/api/v1/feeds/",
+		"feeds":["button"],
+		"key":"ADAFRUIT AIO KEY"
 	}
 }
 

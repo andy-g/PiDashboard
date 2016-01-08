@@ -74,47 +74,9 @@ if (appSettings.twitter.enableTwitterBot){
 					}
 				});
 			} 
-
-			//--Queue or Dowload Torrent(s)
-			else if (appSettings.rss.enableRssListener && /DL #|QUEUE #/i.test(data.direct_message.text)) {
-				rssListener.AddDownloads(data.direct_message.text.match(/#[0-9]+/gi).map(function(num){ return num.replace(/#/,''); }), /DL #/i.test(data.direct_message.text));
-			}
 		}
 	});
 	twitterBot.StartTwitterListener();
-}
-
-//-----listen for rss
-var rssListener;
-if (appSettings.rss.enableRssListener){
-	RssListener = require('./routes/rssListener');
-	var rssListener = new RssListener(appSettings);
-
-	rssListener.on('newTorrents',function(data){
-		system.log("New torrent event");
-		if (appSettings.twitter.enableTwitterBot){
-			twitterBot.SendDirectMessage("Adding" +
-				data.reduce(function(prev, curr){ 
-					return prev + " " + curr.title + " (" + (curr.size / 1024 / 1024).toFixed(2) + "MB),";
-				}, "").slice(0,-1)
-			);
-		}
-		rssListener.AddDownloads(
-			data.map(function(element){ return element.id; }), 
-			(!!appSettings.services.transmission.jobs && appSettings.services.transmission.jobs[1].nextInvocation() < appSettings.services.transmission.jobs[0].nextInvocation()) ? true : false
-		);
-	});
-	rssListener.on('torrentAdded',function(data){
-		if (data.status){
-			system.log("Torrent(s) successfuly queued" + (data.error ? " (" + data.error + ")" : ""));
-			twitterBot.SendDirectMessage("Torrent(s) successfully queued" + (data.error ? " (" + data.error + ")" : ""));
-		} else {
-			system.log("Torrent(s) not successfuly added");
-			system.log(data.error);
-			twitterBot.SendDirectMessage("Torrent(s) not successfully added" + (data.error ? " (" + data.error + ")" : ""));
-		}
-	});
-	rssListener.RssCheck();
 }
 
 //Send notifications that the PiDashboard is now up

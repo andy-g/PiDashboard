@@ -101,14 +101,28 @@ function ContentHandler (appSettings) {
 			return;
 		}
 
-		var device_uri = 'http://192.168.0.100:80' + (status != "status" ? "/" + status : "");
+		var req_options =  {
+			uri: appSettings.adafruitio.url+'/'+device,
+			headers: {
+				"X-AIO-Key": appSettings.adafruitio.key
+			},
+			json: true,
+		}
+		if (status != "status"){
+			req_options.uri = appSettings.adafruitio.url+'/'+device+"/data";
+			req_options.method = "POST";
+			req_options.body = {
+				"value": status.toUpperCase()
+			}
+		}
+
 		request(
-			{uri: device_uri, strictSSL: false},
+			req_options,
 			function(err, response, body){
 				if (err){
 					res.json(500, { "err": "getDeviceStatus: No response body." });
 				} else {
-					var device_status = (JSON.parse(body).lampStatus === "On");
+					var device_status = ((body.last_value || body.value) === "ON");
 					res.json({
 						"device": device,
 						"status": device_status

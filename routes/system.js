@@ -280,16 +280,6 @@ module.exports = function(appSettings){
 	};
 
 	this.sendPushNotification = function(message){
-		if (appSettings.pushCo.enabled){
-			request.post({
-					uri: 'https://api.push.co/1.0/push',
-					form: { api_key: appSettings.pushCo.keys.api_key, api_secret: appSettings.pushCo.keys.api_secret, message: message }
-				},
-				function(err, response, body){
-					if (err){ system.log(err);	}
-				}
-			);
-		}
 		if (appSettings.boxcar2.enabled){
 			request.post({
 					uri: 'https://new.boxcar.io/api/notifications/',
