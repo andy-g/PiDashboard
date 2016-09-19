@@ -3,6 +3,7 @@
 		"key": "/path/to/key.pem",
 		"cert": "/path/to/cert.pem"
 	},
+	"jwtSecret": "jwt.secret",
 	"routerStatsUri": "http://192.168.0.1/cgi-bin/usage_json",
 	"usageHistoryPath": "usage_history.json",
 	"namedDevices": {
