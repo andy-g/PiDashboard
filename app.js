@@ -33,7 +33,8 @@ routes(app, appSettings);
 https = require('https');
 var options = {
 	key: fs.readFileSync(appSettings.cert.key),
-	cert: fs.readFileSync(appSettings.cert.cert)
+	cert: fs.readFileSync(appSettings.cert.cert),
+	ca: fs.readFileSync(appSettings.cert.chain)
 };
 https.createServer(options, app).listen(443);
 //app.listen(8080);

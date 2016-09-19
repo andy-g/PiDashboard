@@ -20,7 +20,7 @@ module.exports = exports = function(app, appSettings) {
             var token = jwt.sign(user, app.get('jwtSecret'), {
                 expiresIn: "30 days"
             });
-            res.cookie('access_token', token, { maxAge: 900000, httpOnly: true });
+            res.cookie('access_token', token, { httpOnly: true });
             res.json({
                 success: true,
                 token: token
