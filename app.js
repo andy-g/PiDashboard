@@ -26,14 +26,14 @@ var system = new System(appSettings);
 routes(app, appSettings);
 
 //-----start server (comment out app.listen and uncomment previous lines to use https)-----
-//https = require('https');
-//var options = {
-//	key: fs.readFileSync('keys/server-key.pem'),
-//	cert: fs.readFileSync('keys/server-cert.pem')
-//};
-//https.createServer(options, app).listen(8080);//(443);
-app.listen(8080);
-system.log('Listening on 8080');
+https = require('https');
+var options = {
+	key: fs.readFileSync(appSettings.cert.key),
+	cert: fs.readFileSync(appSettings.cert.cert)
+};
+https.createServer(options, app).listen(443);
+//app.listen(8080);
+system.log('Listening on 443');
 
 //-----start scheduled tasks
 var rule = new schedule.RecurrenceRule();
