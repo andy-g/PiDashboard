@@ -4,7 +4,29 @@ var ContentHandler = require('./usage'),
 module.exports = exports = function(app, appSettings) {
     var contentHandler = new ContentHandler(appSettings);
 
-    app.get('/', function(req, res) { res.send('hello world'); });
+    // route middleware to check for a token and decode
+    app.use(function(req, res, next) {
+        var token = req.cookies.access_token || req.body.token || req.query.token || req.headers['x-access-token'];
+        if (token) {
+            req.token = token;
+            // verifies secret and checks exp
+            jwt.verify(token, app.get('jwtSecret'), function(err, decoded) {
+                if ( ! err) {
+                    req.user = decoded;
+                }
+                next();
+            });
+        } else {
+            next();
+        }
+    });
+
+    app.get('/', function(req, res) {
+        if ( ! req.user)
+            res.redirect(302, '/login.html');
+        else
+            res.redirect(302, '/PiDashboard.html');
+    });
 
     app.post('/login', function(req, res) {
         var user = {
@@ -14,38 +36,25 @@ module.exports = exports = function(app, appSettings) {
         };
 
         if (req.body.name != user.name || req.body.password != user.password) {
-            res.json({ success: false, message: 'Authentication failed. Wrong password.' });
+            res.redirect(302, '/login.html');
         } else {
             delete user.password;
             var token = jwt.sign(user, app.get('jwtSecret'), {
                 expiresIn: "30 days"
             });
             res.cookie('access_token', token, { httpOnly: true });
-            res.json({
-                success: true,
-                token: token
-            });
+            res.redirect(302, '/PiDashboard.html');
         }
     });
 
-    // route middleware to verify a token
+    // route middleware to verify user (based on token verified above)
     app.use(function(req, res, next) {
-        var token = req.cookies.access_token || req.body.token || req.query.token || req.headers['x-access-token'];
-        if (token) {
-            // verifies secret and checks exp
-            jwt.verify(token, app.get('jwtSecret'), function(err, decoded) {
-                if (err) {
-                    return res.json({ success: false, message: 'Failed to authenticate token.' });
-                } else {
-                    req.decoded = decoded;
-                    next();
-                }
-            });
+        if ( ! req.token) {
+            return res.status(403).send({ success: false, message: 'No token provided.' });
+        } else if ( ! req.user) {
+            return res.status(403).send({ success: false, message: 'Failed to authenticate token.' });
         } else {
-            return res.status(403).send({
-                success: false,
-                message: 'No token provided.'
-            });
+            next();
         }
     });
 
