@@ -42,7 +42,7 @@ module.exports = exports = function(app, appSettings) {
             var token = jwt.sign(user, app.get('jwtSecret'), {
                 expiresIn: "30 days"
             });
-            res.cookie('access_token', token, { httpOnly: true });
+            res.cookie('access_token', token, { httpOnly: true, maxAge: 2592000000 });
             res.redirect(302, '/PiDashboard.html');
         }
     });

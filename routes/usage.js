@@ -74,7 +74,7 @@ function ContentHandler(appSettings) {
         }
 
         var isScheduled = !!service.jobs;
-        if (status != "status" && req.route.method != "put") {
+        if (status != "status" && req.method != "PUT") {
             res.json(500, { "err": "Service status could not be set using a get request, please rather use a put request" });
             return;
         }
@@ -96,7 +96,7 @@ function ContentHandler(appSettings) {
         var device = req.body['device'];
         var status = !req.body['status'] || !(/on|off/g).test(req.body['status']) ? "status" : req.body['status'];
 
-        if (status != "status" && req.route.method != "put") {
+        if (status != "status" && req.method != "PUT") {
             res.json(500, { "err": "Device status could not be set using a get request, please rather use a put request" });
             return;
         }
