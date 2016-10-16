@@ -1,0 +1,39 @@
+{
+  "name": "PiDashboard-Server",
+  "version": "0.1.0",
+  "description": "A general dashboard API for Raspberry Pi",
+  "main": "server.js",
+  "private": true,
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/andy-g/PiDashboard.git"
+  },
+  "keywords": [
+    "Pi Dashboard"
+  ],
+  "author": "Andy Gardner",
+  "license": "UNLICENSED",
+  "bugs": {
+    "url": "https://github.com/andy-g/PiDashboard/issues"
+  },
+  "homepage": "https://github.com/andy-g/PiDashboard",
+  "dependencies": {
+    "body-parser": "^1.6.5",
+    "compression": "^1.0.11",
+    "cors": "^2.4.1",
+    "dotenv": "^0.4.0",
+    "errorhandler": "^1.1.1",
+    "express": "^4.8.5",
+    // "express-jwt": "^5.1.x",
+    "jsonwebtoken": "^7.1.x",
+    "lodash": "^2.4.1",
+    "morgan": "^1.2.3",
+    "moment": "2.x",
+    "node-schedule": "0.x",
+    "twitter": "0.2.x",
+    "xml2js": "0.2.x"
+  }
+}
