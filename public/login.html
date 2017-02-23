@@ -1,0 +1,66 @@
+<!DOCTYPE html>
+<meta name="viewport" content="initial-scale=1.0">
+<meta name="apple-mobile-web-app-capable" content="yes" />
+<html>
+
+<head>
+    <link rel="apple-touch-icon-precomposed" href="touch-icon-iphone.png" />
+    <link rel="icon" type="image/png" href="/favicon.png">
+    <title>Login</title>
+    <link href="resources/PiDashboard.css" rel="stylesheet">
+    <script src="resources/zepto.min.js"></script>
+    <style type="text/css">
+        body {
+            max-width: 100%;
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            margin: 0px;
+        }
+
+        input {
+            font-size: 14px;
+            border: 0px;
+            background-color: #F4F4F4;
+            padding: 12px;
+            margin: 4px;
+            width: 270px;
+            box-sizing: content-box;
+            color: #777;
+            border-radius: 5px;
+        }
+
+        .button {
+            background-color: #57a957;
+            color: white;
+            margin-top: 10px;
+        }
+
+        ::-webkit-input-placeholder {
+            color: #ccc;
+        }
+
+        input:focus {
+            outline: none;
+        }
+    </style>
+</head>
+
+<body style="max-width: 100%; text-align: center;">
+    <form action="/login" method="post">
+        <div id="content">
+            <div>
+                <input type="input" name="name" placeholder="username">
+            </div>
+            <div>
+                <input type="password" name="password" placeholder="password">
+            </div>
+            <div>
+                <input class="button" type="submit" value="LOGIN"></input>
+            </div>
+        </div>
+    </form>
+</body>
+
+</html>

@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="viewport" content="initial-scale=1.0">
 <meta name="apple-mobile-web-app-capable" content="yes" />
 <html>
   <head>
@@ -10,6 +10,7 @@
 	<link rel="apple-touch-icon" sizes="114x114" href="touch-icon-iphone-retina.png" />
 	<link rel="apple-touch-icon" sizes="144x144" href="touch-icon-ipad-retina.png" />
 	-->
+	<meta name="theme-color" content="#57a957">
     <title>Pi Dashboard</title>
     <link href="resources/PiDashboard.css" rel="stylesheet">
 	<script src="resources/PiDashboard.js"></script>
@@ -40,36 +41,8 @@
 	</div>
 	<hr style="margin: 6px 10px 15px 10px;">
 	<div class="container">
-		<div class="bs-docs-example">
-			<span class="help-inline" style="width: 110px;font-size: 13px;font-family: "Helvetica Neue",Helvetica,Arial,sans-serif;">Transmission:</span>              
-			<div class="btn-group" data-toggle="buttons-radio">
-				<button type="button" name='service' class="btn btn-mini" style="width:66px" value="1" data-service="transmission">stop</button>
-				<button type="button" name='service' class="btn btn-mini"  style="width:66px" value="0" data-service="transmission">start</button>
-				<button type="button" name="service" class="btn btn-mini" style="width:32px" value="2" data-service="transmission">
-					<i class="icon icon-time"></i>
-				</button>
-			</div>
-		</div>
-		<div class="bs-docs-example">
-			<span class="help-inline" style="width: 110px;font-size: 13px;font-family: "Helvetica Neue",Helvetica,Arial,sans-serif;">SABnzbd+:</span>              
-			<div class="btn-group" data-toggle="buttons-radio">
-				<button type="button" name='service' class="btn btn-mini" style="width:66px" value="1" data-service="sabnzbd">stop</button>
-				<button type="button" name='service' class="btn btn-mini"  style="width:66px" value="0" data-service="sabnzbd">start</button>
-				<button type="button" name="service" class="btn btn-mini" style="width:32px" value="2" data-service="sabnzbd">
-					<i class="icon icon-time"></i>
-				</button>
-			</div>
-		</div>
-		<div class="bs-docs-example">
-			<span class="help-inline" style="width: 110px;font-size: 13px;font-family: "Helvetica Neue",Helvetica,Arial,sans-serif;">Sickbeard:</span>              
-			<div class="btn-group" data-toggle="buttons-radio">
-				<button type="button" name='service' class="btn btn-mini" style="width:66px" value="1" data-service="sickbeard">stop</button>
-				<button type="button" name='service' class="btn btn-mini"  style="width:66px" value="0" data-service="sickbeard">start</button>
-				<button type="button" name="service" class="btn btn-mini" style="width:32px" value="2" data-service="sickbeard">
-					<i class="icon icon-time"></i>
-				</button>
-			</div>
-		</div>
+		<div id="services"></div>
+		<div id="devices"></div>
 	</div>
   </body>
 </html>

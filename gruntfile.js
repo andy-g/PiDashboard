@@ -70,6 +70,6 @@
     });
 
     grunt.registerTask('default', ['test', 'clean', 'copy', 'cssmin' ]);
-    grunt.registerTask('test', ['jshint', 'csslint', 'nodeunit']);
+    grunt.registerTask('test', ['jshint', 'nodeunit']);
   };
 }());

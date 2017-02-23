@@ -8,7 +8,7 @@ module.exports = function(appSettings){
 	var system = this;
 
 	this.driveUsage = function(callback) {
-		exec("df -h", function(error, stdout, stderr){
+		exec("df -h -xtmpfs -xdevtmpfs", function(error, stdout, stderr){
 			if (error !== null) {
 				system.log('exec error: ' + error);
 				//res.json(500, {"err" : "Disk usage could not be retrieved."});
@@ -211,14 +211,19 @@ module.exports = function(appSettings){
 		});
 	};
 
-	this.getGraphData = function(runDate, callback){
+	this.getGraphData = function(runDate, old, callback){
 		system.getMergedUsage(false, false, function(err, usage){
 			var json = [];
 			var dayUsage = usage[runDate.setHours(0,0,0,0)];
 			for (var mac in dayUsage.devices) {
-				var item = { "key": appSettings.namedDevices[mac] || "unknown",	"values": [] };
+				var item = { "name": appSettings.namedDevices[mac] || "unknown", "data": [] };
+				if (old)
+					item = { "key": appSettings.namedDevices[mac] || "unknown", "values": [] };	
 				dayUsage.devices[mac].hourly_usage.forEach(function(bytes, index){
-					item.values.push({ "x": index, "y": bytes});
+					if (old)
+						item.values.push({ "x": index, "y": bytes});
+					else
+						item.data.push(bytes);
 				});
 				json.push(item);
 			}
@@ -228,6 +233,9 @@ module.exports = function(appSettings){
 	};
 
 	this.execService = function(serviceName, status, callback){
+		if (status != "status")
+			system.log("execService: " + status + "ing " + serviceName);
+
 		var d = require('domain').create();
 		d.on('error', function(err){
 			system.log('Exec Service Error:');
@@ -235,7 +243,13 @@ module.exports = function(appSettings){
 		});
 
 		d.run(function(){
-			exec("sudo /etc/init.d/" + serviceName + " " + status, function(error, stdout, stderr){
+			var cmd = '';
+			if (serviceName == 'kodi')
+				cmd = "sudo systemctl " + status + " mediacenter";
+			else
+				cmd = "sudo service " + serviceName + " " + status;
+
+			exec(cmd, function(error, stdout, stderr){
 				if (status != "status" && error !== null) {
 					system.log('exec error: ' + error.stack);
 					if (callback)
@@ -245,7 +259,7 @@ module.exports = function(appSettings){
 
 				//If we're setting the status, just return what we've set it to (return can come back before service status is changed), otherwise verify output to determine service status
 				if (callback)
-					callback({ service: serviceName, status: (status == "status" ? (stdout.indexOf(" is running") > -1) : (status == "start")) });
+					callback({ service: serviceName, status: (status == "status" ? ((stdout.indexOf("Active: active (running)") > -1)) : (status == "start")) });
 			});
 		});
 	};
@@ -266,16 +280,6 @@ module.exports = function(appSettings){
 	};
 
 	this.sendPushNotification = function(message){
-		if (appSettings.pushCo.enabled){
-			request.post({
-					uri: 'https://api.push.co/1.0/push',
-					form: { api_key: appSettings.pushCo.keys.api_key, api_secret: appSettings.pushCo.keys.api_secret, message: message }
-				},
-				function(err, response, body){
-					if (err){ system.log(err);	}
-				}
-			);
-		}
 		if (appSettings.boxcar2.enabled){
 			request.post({
 					uri: 'https://new.boxcar.io/api/notifications/',

@@ -16,11 +16,14 @@
     "url": "https://github.com/andy-g/PiDashboard/issues"
   },
   "dependencies": {
-    "express": "3.x",
-    "request": "2.x",
+    "body-parser": "^1.15.2",
+    "compression": "^1.6.2",
+    "cookie-parser": "^1.4.3",
+    "express": "4.x",
+    "jsonwebtoken": "^7.1.9",
+    "moment": "2.x",
     "node-schedule": "0.x",
     "twitter": "0.2.x",
-    "moment": "2.x",
     "xml2js": "0.2.x"
   },
   "devDependencies": {

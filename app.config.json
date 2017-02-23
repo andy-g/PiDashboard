@@ -1,4 +1,9 @@
 {
+	"cert": {
+		"key": "/path/to/key.pem",
+		"cert": "/path/to/cert.pem"
+	},
+	"jwtSecret": "jwt.secret",
 	"routerStatsUri": "http://192.168.0.1/cgi-bin/usage_json",
 	"usageHistoryPath": "usage_history.json",
 	"namedDevices": {
@@ -6,8 +11,8 @@
 		"192.168.1.101": "Device2"
 	},
 	"timePeriods":[
-		{ "name": "Night Surfer", "periods": [ { "start": 0,"stop": 5 }, { "start": 23, "stop": 24 } ] },
-		{ "name": "Peak", "periods": [ {"start": 5, "stop": 23} ] }
+		{ "name": "Night Surfer", "periods": [ { "start": 0,"stop": 7 } ] },
+		{ "name": "Peak", "periods": [ {"start": 7, "stop": 24} ] }
 	],
 	"dataAllocations":[
 		{ "name": "Night Surfer", "description": "Data available between 23:00 and 5:00", "bytes": 10737418240 },
@@ -16,8 +21,8 @@
 	"services": {
 		"transmission": {
 			"serviceName": "transmission-daemon",
-			"startSchedule": { "hour": 23, "minute": 5 },
-			"endSchedule": { "hour": 4, "minute": 55 }
+			"startSchedule": { "hour": 0, "minute": 5 },
+			"endSchedule": { "hour": 7, "minute": 0 }
 		},
 		"sabnzbd": {
 			"serviceName": "sabnzbdplus",
@@ -28,6 +33,11 @@
 			"serviceName": "sickbeard",
 			"startSchedule": { "hour": 0, "minute": 10 },
 			"endSchedule": { "hour": 7, "minute": 5 }
+		},
+		"kodi": {
+			"serviceName": "kodi",
+			"startSchedule": { "hour": 23, "minute": 50 },
+			"endSchedule": { "hour": 5, "minute": 5 }
 		}
 	},
 	"twitter": {
@@ -40,25 +50,15 @@
 		},
 		"defaultRecipient": "@twitter_user"
 	},
-	"rss": {
-		"enableRssListener": true,
-		"interval": 7200000,
-		"rssPaths": [
-			"http://path_to_rss_feed"
-		],
-		"username": "transmission-username",
-		"password": "transmission-password"
-	},
-	"pushCo":{
-		"enabled": true,
-		"keys": {
-			"api_key": "push.co api_key",
-			"api_secret": "push.co api_secret"
-		}
-	},
 	"boxcar2":{
 		"enabled": false,
 		"access_token": "BOXCAR ACCESS TOKEN",
 		"notification_icon": "https://raw.githubusercontent.com/andy-g/PiDashboard/master/public/favicon.png"
+	},
+	"adafruitio":{
+		"url": "https://io.adafruit.com/api/v1/feeds/",
+		"feeds":["button"],
+		"key":"ADAFRUIT AIO KEY"
 	}
 }
+

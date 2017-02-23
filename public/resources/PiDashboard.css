@@ -59,6 +59,7 @@ body{
   display:none;
   border-collapse: collapse;
   width: 100%;
+  font-size: 11px;
 }
 
 .table td:first-of-type{
@@ -188,7 +189,7 @@ section {
 }
 
 small {
-  font-size: 85%;
+  font-size: 9.35px;
 }
 
 .muted {
@@ -244,15 +245,37 @@ hr {
   border-bottom: 1px solid #ffffff;
 }
 
-.help-inline {
+#devices {
+  margin-top: 15px
+}
+
+.service, .device {
+  clear:both;
+  margin-top:8px;
+}
+
+.device .label, .service .label {
+  color: #595959;
   display: inline-block;
   vertical-align: middle;
   padding-left: 5px;
+  width: 110px;
+  font-size: 13px;
+  font-family: 'Helvetica Neue',Helvetica,Arial,sans-serif;
 }
 
-.help-block, .help-inline {
-  color: #595959;
+.device button, .service button {
+  width: 82px;
 }
+
+.device.schedulable button, .service.schedulable button {
+  width: 66px;
+}
+
+.device.schedulable button:last-child, .service.schedulable button:last-child {
+  width: 32px;
+}
+
 .btn-group>.btn {
   position: relative;
   /*-webkit-border-radius: 0;*/
@@ -391,9 +414,4 @@ button {
 
 .icon-white {
   background-image: url("glyphicons-halflings-white.png");
-}
-
-.bs-docs-example {
-  clear:both;
-  margin-top:8px;
 }
