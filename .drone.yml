@@ -5,7 +5,7 @@ pipeline:
       - echo 'Africa/Johannesburg' | sudo tee /etc/timezone
       - sudo dpkg-reconfigure --frontend noninteractive tzdata
       - npm install -g grunt-cli
-      - cd /var/cache/drone/src/github.com/andy-g/PiDashboard
+      # - cd /var/cache/drone/src/github.com/andy-g/PiDashboard
       - npm install
       - grunt
     # notify:
