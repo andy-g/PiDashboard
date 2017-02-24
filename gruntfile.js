@@ -69,7 +69,8 @@
       }
     });
 
-    grunt.registerTask('default', ['test', 'clean', 'copy', 'cssmin' ]);
+    //grunt.registerTask('default', ['test', 'clean', 'copy', 'cssmin' ]);
+    grunt.registerTask('default', ['test', 'clean', 'copy' ]);
     grunt.registerTask('test', ['jshint', 'nodeunit']);
   };
 }());
