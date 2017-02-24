@@ -23,6 +23,7 @@
     "jsonwebtoken": "^7.1.9",
     "moment": "2.x",
     "node-schedule": "0.x",
+    "request": "^2.79.0",
     "twitter": "0.2.x",
     "xml2js": "0.2.x"
   },
