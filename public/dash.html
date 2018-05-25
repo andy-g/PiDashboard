@@ -388,9 +388,9 @@
 						if (day) {
 							result[0] = Object.assign(day.peak, result[0]);
 						}
-						day = this.ispUsage[now.getDate() - 2]
+						day = this.ispUsage[now.getDate() - 1]
 						if (day) {
-							result[1] = Object.assign(day.offPeak, result[1]);
+							result[1] = Object.assign(day.peak, result[1]);
 						}
 					}
 					return result
