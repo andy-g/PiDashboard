@@ -2,10 +2,10 @@ var requestTimeout = 1000 * 10; // 10 seconds
 
 buttons = {
     services: [
-        { service: "transmission", alias: "Transmission", schedulable: true },
-        { service: "sabnzbd", alias: "SABnzbd+", schedulable: true },
-        { service: "sickbeard", alias: "Sickbeard", schedulable: true },
-        { service: "kodi", alias: "Kodi", schedulable: false },
+        { service: "Transmission", alias: "Transmission", schedulable: true },
+        { service: "SABnzbd+", alias: "SABnzbd+", schedulable: true },
+        { service: "Sickbeard", alias: "Sickbeard", schedulable: true },
+        { service: "Kodi", alias: "Kodi", schedulable: false },
     ],
     devices: [
         { device: "button", alias: "Lamp", schedulable: false }
