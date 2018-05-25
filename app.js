@@ -41,22 +41,22 @@ https.createServer(options, app).listen(443);
 system.log('Listening on 443');
 
 //-----start scheduled tasks
-var rule = new schedule.RecurrenceRule();
-rule.minute = 0;
+// var rule = new schedule.RecurrenceRule();
+// rule.minute = 0;
 
-var j = schedule.scheduleJob('network usage log', rule, function() {
-    // If were catching up jobs (due to a datetime change), skip previous jobs & only run the last job
-    if (j.nextInvocation() < new Date()) {
-        system.log('skipping job');
-        return;
-    }
+// var j = schedule.scheduleJob('network usage log', rule, function () {
+//     // If were catching up jobs (due to a datetime change), skip previous jobs & only run the last job
+//     if (j.nextInvocation() < new Date()) {
+//         system.log('skipping job');
+//         return;
+//     }
 
-    system.log("Retrieving hourly usage: ");
-    system.saveCurrentNetworkUsage(function(message) {
-        system.log(message);
-    });
-});
-system.log('Scheduled hourly job for logging usage');
+//     system.log("Retrieving hourly usage: ");
+//     system.saveCurrentNetworkUsage(function (message) {
+//         system.log(message);
+//     });
+// });
+// system.log('Scheduled hourly job for logging usage');
 
 //-----listen for direct messages
 if (appSettings.twitter.enableTwitterBot) {
