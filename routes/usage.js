@@ -11,11 +11,11 @@ function ContentHandler(appSettings) {
     var system = new System(appSettings);
 
     //try cache data, and load it on startup or when rewriting to the file
-    this.usageSummary = function(req, res) {
+    this.usageSummary = function (req, res) {
         var runDate = !req.params['runDate'] ? new Date() : new Date(parseInt(req.params['runDate']));
 
         res.header("Access-Control-Allow-Origin", "*");
-        system.getUsageSummary(runDate, function(error, data) {
+        system.getIspNetworkUsage(runDate, function (error, data) {
             if (!data || error)
                 res.json(500, { "err": "Current usage could not be retrieved - check router status." });
             else
@@ -23,11 +23,11 @@ function ContentHandler(appSettings) {
         });
     };
 
-    this.graphData = function(req, res) {
+    this.graphData = function (req, res) {
         var runDate = !req.params['runDate'] ? new Date() : new Date(isNaN(req.params['runDate']) ? req.params['runDate'] : Number(req.params['runDate']));
 
         res.header("Access-Control-Allow-Origin", "*");
-        system.getGraphData(runDate, !req.query['new'], function(error, data) {
+        system.getGraphData(runDate, !req.query['new'], function (error, data) {
             if (!data || error)
                 res.json(500, { "err": "Graph data could not be retrieved" });
             else
@@ -35,9 +35,9 @@ function ContentHandler(appSettings) {
         });
     };
 
-    this.drives = function(req, res) {
+    this.drives = function (req, res) {
         res.header("Access-Control-Allow-Origin", "*");
-        system.driveUsage(function(error, data) {
+        system.driveUsage(function (error, data) {
             if (error)
                 res.json(500, error);
             else
@@ -45,7 +45,19 @@ function ContentHandler(appSettings) {
         });
     };
 
-    this.serviceStatus = function(req, res) {
+
+    this.getServices = function (req, res) {
+        res.header("Access-Control-Allow-Origin", "*");
+
+        system.getServiceStatus(null, function (error, data) {
+            if (error)
+                res.json(500, error);
+            else
+                res.json(data);
+        });
+    };
+
+    this.serviceStatus = function (req, res) {
         res.header("Access-Control-Allow-Origin", "*");
 
         var service = appSettings.services[req.body['service']];
@@ -59,12 +71,12 @@ function ContentHandler(appSettings) {
         var status = !req.body['status'] || !(/start|stop/g).test(req.body['status']) ? "status" : req.body['status'];
         if (req.body['isScheduled']) {
             if (service.jobs) {
-                service.jobs.forEach(function(job) { job.cancel(); });
+                service.jobs.forEach(function (job) { job.cancel(); });
                 delete service.jobs;
             }
             if (req.body['isScheduled'] === 'true' && service.startSchedule && service.endSchedule) {
-                var serviceStart = schedule.scheduleJob(service.serviceName + '-start', service.startSchedule, function() { system.execService(service.serviceName, 'start'); });
-                var serviceStop = schedule.scheduleJob(service.serviceName + '-stop', service.endSchedule, function() { system.execService(service.serviceName, 'stop'); });
+                var serviceStart = schedule.scheduleJob(service.serviceName + '-start', service.startSchedule, function () { system.execService(service.serviceName, 'start'); });
+                var serviceStop = schedule.scheduleJob(service.serviceName + '-stop', service.endSchedule, function () { system.execService(service.serviceName, 'stop'); });
                 service.jobs = [serviceStart, serviceStop];
 
                 //if it's currently after startSchedule and before endSchedule, set status = "start"
@@ -79,7 +91,7 @@ function ContentHandler(appSettings) {
             return;
         }
 
-        system.execService(service.serviceName, status, function(output) {
+        system.execService(service.serviceName, status, function (output) {
             if (!output.err) {
                 output.isScheduled = isScheduled;
                 output.alias = req.body['service'];
@@ -90,7 +102,7 @@ function ContentHandler(appSettings) {
         });
     };
 
-    this.deviceStatus = function(req, res) {
+    this.deviceStatus = function (req, res) {
         res.header("Access-Control-Allow-Origin", "*");
 
         var device = req.body['device'];
@@ -118,7 +130,7 @@ function ContentHandler(appSettings) {
 
         request(
             req_options,
-            function(err, response, body) {
+            function (err, response, body) {
                 if (err) {
                     res.json(500, { "err": "getDeviceStatus: No response body." });
                 } else {

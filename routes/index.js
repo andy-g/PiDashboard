@@ -61,7 +61,7 @@ module.exports = exports = function(app, appSettings) {
     app.get('/summary/:runDate?', contentHandler.usageSummary);
     app.get('/graph_data/:runDate?', contentHandler.graphData);
     app.get('/drives', contentHandler.drives);
-    app.get('/services/:service?/:status?', contentHandler.serviceStatus);
+    app.get('/services/:service?/:status?', contentHandler.getServices);
     app.put('/services/:service?/:status?', contentHandler.serviceStatus);
     app.get('/devices/:device?/:status?', contentHandler.deviceStatus);
     app.put('/devices/:device?/:status?', contentHandler.deviceStatus);

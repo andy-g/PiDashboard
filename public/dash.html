@@ -1,0 +1,486 @@
+<!DOCTYPE html>
+<meta name="viewport" content="initial-scale=1.0">
+<meta name="apple-mobile-web-app-capable" content="yes" />
+<html>
+
+<head>
+	<link href="https://fonts.googleapis.com/css?family=Anton|Open+Sans+Condensed:300,700" rel="stylesheet">
+	<link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.0.13/css/all.css" integrity="sha384-DNOHZ68U8hZfKXOrtjWvjxusGo9WQnrNx2sqG0tfsghAvtVlRW3tvkXWZh58N9jp"
+	 crossorigin="anonymous">
+	<style>
+		body {
+			background: rgb(240, 240, 240);
+			font-family: 'Open Sans Condensed', sans-serif;
+			font-size: 12px;
+		}
+
+		#app {
+			/* max-width: 366px; */
+			/* border-right: 1px solid lightgray; */
+		}
+
+		.statGroup {
+			padding-bottom: 6px;
+		}
+
+		.statGroup>.title {
+			margin-bottom: 5px;
+			padding-bottom: 3px;
+			font-size: 200%;
+			/* border-top: 1px dotted lightgrey; */
+		}
+
+		.statGroup:first-of-type>.title {
+			border-top: none;
+		}
+
+		.statNodeGroup {
+			display: flex;
+		}
+
+		.statNode {
+			/* float: left; */
+			/*min-width: 140px;*/
+			border-right: 1px solid rgba(0, 0, 0, 0.06);
+			/* padding-right: 19px;
+			margin-right: 20px; */
+			padding: 0 10px 0 10px;
+			/* min-width: 40px; */
+		}
+
+		.statNode:last-child {
+			border-right: none;
+			padding-right: 0;
+			margin-right: 0;
+		}
+
+		.statTitle {
+			font-family: 'Open Sans Condensed', sans-serif;
+			display: block;
+			/* position: relative;
+			top: 5px; */
+			opacity: 0.5;
+			font-size: 15px;
+			margin-bottom: -5px;
+			margin-top: -4px;
+			min-width: 40px;
+		}
+
+		.statValue {
+			font-family: 'Anton', sans-serif;
+			float: left;
+			font-size: 25px;
+			white-space: nowrap;
+		}
+
+		.statFooter {
+			font-family: 'Open Sans Condensed', sans-serif;
+			display: block;
+			position: relative;
+			top: -9px;
+			clear: both;
+			font-size: 12px;
+			margin-top: -3px;
+			/* opacity: 0.5; */
+		}
+
+		.statFooter .fas {
+			font-size: 9px;
+			position: relative;
+			top: -1px;
+			padding-right: 2px;
+			color: #006f00;
+		}
+
+		.statFooter:last-child .fas {
+			color: #de0b00
+		}
+
+		.usageChart {
+			line-height: 1em;
+		}
+
+		.usageChart .title {
+			color: black;
+			font-weight: bold;
+		}
+
+		.progress {
+			overflow: hidden;
+			background-color: #f7f7f7;
+			background-image: linear-gradient(to bottom, #f5f5f5, #f9f9f9);
+			background-repeat: repeat-x;
+			/* -webkit-box-shadow: inset 0 1px 2px rgba(0, 0, 0, 0.1); */
+			box-shadow: inset 0 1px 2px rgba(0, 0, 0, 0.1);
+			/* -webkit-border-radius: 4px; */
+			border-radius: 4px;
+			height: 4px;
+			margin: 2px 0 6px 0;
+		}
+
+		.progress .bar {
+			height: 100%;
+			color: #ffffff;
+			/* float: left; */
+			/* font-size: 12px; */
+			/* text-align: center; */
+			/* text-shadow: 0 -1px 0 rgba(0, 0, 0, 0.25); */
+			/* -webkit-box-shadow: inset 0 -1px 0 rgba(0, 0, 0, 0.15); */
+			/* box-shadow: inset 0 -1px 0 rgba(0, 0, 0, 0.15); */
+			/* box-sizing: border-box; */
+			/* -webkit-transition: width 0.6s ease; */
+			transition: width 0.6s ease;
+			border-radius: 4px;
+		}
+
+		.success {
+			background-color: #5eb95e;
+			/* background-image: linear-gradient(to bottom, #62c462, #57a957); */
+			/* background-repeat: repeat-x; */
+		}
+
+		.danger {
+			background-color: #dd514c;
+		}
+
+		.warning {
+			background-color: #faa732;
+		}
+
+		/* graph */
+
+		/* svg {
+			position: absolute;
+			top: 0px;
+			left: 0px;
+			
+
+		padding: 0;
+		
+
+		z-index: 100;
+		}
+
+		*/
+
+		svg {
+			/* display: none; */
+			width: 100%;
+			height: 83px;
+		}
+
+		svg text {
+			font-size: 8px;
+		}
+
+		.bar {
+			fill: rgb(100, 100, 100);
+		}
+
+		.bar:hover {
+			fill: #000;
+		}
+
+		.axis--x path {
+			display: none;
+		}
+
+		.axis--y path {
+			display: none;
+		}
+
+		/* Services */
+
+		.service,
+		.device {
+			/* margin-top: 8px; */
+			display: inline-block;
+			margin: 0 1px 0 1px;
+		}
+
+		.device .label,
+		.service .label {
+			/* color: #595959; */
+			display: inline-block;
+			vertical-align: middle;
+			padding-left: 5px;
+			/* width: 110px; */
+			font-size: 15px;
+			/* font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif; */
+			/* display: inline-block; */
+			text-align: center;
+			border-radius: 4px;
+			padding: 1px 9px 3px;
+			font-weight: 100;
+			color: white;
+			transition: background-color 100ms linear;
+		}
+
+		.service .label .scheduled {
+			opacity: 1;
+		}
+
+		.service .label .fa-clock {
+			opacity: 0.3;
+			cursor: pointer
+		}
+
+		.service .label.scheduled .fa-clock {
+			opacity: 1;
+		}
+
+		.service .fas {
+			font-weight: 100;
+			font-size: 13px;
+			-webkit-font-smoothing: subpixel-antialiased;
+			margin: 0px 0 0 4px;
+			/* position: relative;
+			top: -1px; */
+			padding: 1px;
+		}
+	</style>
+</head>
+
+<body>
+	<div id="app">
+		<div class="statGroup">
+			<div class="title">Data Usage:</div>
+			<div class="statNodeGroup">
+				<data-in-out v-for="item in dailyDataUsage" :key="item.name" :item="item" format="0.00 ib"></data-in-out>
+				<div class="statNode">
+					<svg></svg>
+				</div>
+			</div>
+		</div>
+		<div class="statGroup">
+			<div class='usageChart'>
+				<percentage-bar v-for="item in monthlyUsage" :key="item.title" :item="item" format="0ib"></percentage-bar>
+			</div>
+		</div>
+		<div class="statGroup">
+			<div class="title">Disk Usage:</div>
+			<div class='usageChart'>
+				<percentage-bar v-for="item in diskUsage" :key="item.title" :item="item" format="0ib"></percentage-bar>
+			</div>
+		</div>
+		<div class="statGroup">
+			<div class="title">Services:</div>
+			<div class="services">
+				<service v-for="service in services" :key="service.title" :service="service"></service>
+			</div>
+		</div>
+	</div>
+
+	<script src="//cdnjs.cloudflare.com/ajax/libs/numeral.js/2.0.6/numeral.min.js"></script>
+	<script src="https://cdn.jsdelivr.net/npm/vue/dist/vue.js"></script>
+	<script src="https://d3js.org/d3.v4.min.js"></script>
+	<script src="https://unpkg.com/axios/dist/axios.min.js"></script>
+	<script>
+		Vue.component('dataInOut', {
+			template: `
+					<div class='statNode'>
+						<span class='statTitle'>{{ item.name }}:</span>
+						<span class='statValue'>{{ total | numeric(format) }}</span>
+						<span class='statFooter'>
+							<i class="fas fa-arrow-up"></i>{{ item.up | numeric(format) }}
+						</span>
+						<span class='statFooter'>
+							<i class="fas fa-arrow-down"></i>{{ item.down | numeric(format) }}
+						</span>
+					</div>
+				`,
+			props: {
+				item: { required: true, type: Object },
+				format: { type: String }
+			},
+			computed: {
+				// a computed getter
+				total: function () {
+					if (isNaN(this.item.up) || isNaN(this.item.down) || this.item.up === null || this.item.down === null)
+						return null;
+					return this.item.up + this.item.down;
+				}
+			}
+		});
+
+		Vue.component('service', {
+			template: `
+				<div class="service">
+					<div onclick="alert('service')" class="label" :class="{ 'scheduled': service.scheduled, 'success': service.status == 'started', 'warning': service.status == 'starting' || service.status == 'stopping', 'danger': service.status == 'stopped' }">
+						{{ service.title }}
+						<i v-if="service.status == 'starting' || service.status == 'stopping'" class="fas fa-spinner fa-spin" style="font-weight:900"></i>
+						<i v-if="service.scheduled" class="fas fa-clock" onclick="(function(e) { e.stopPropagation(); alert('schedule'); })(event)"></i>
+					</div>
+				</div>
+				`,
+			props: {
+				service: { required: true, type: Object },
+			},
+		});
+
+		Vue.component('percentageBar', {
+			template: `
+					<div>
+						<span class="title">{{ item.title }}</span><span class="details">&nbsp;&nbsp;{{ item.used | numeric(format) }} of {{ item.allocated | numeric(format) }} - {{ fraction | numeric("0%") }}</span>
+						<div class="progress">
+							<div class="bar" 
+								:class="{ 'success': fraction <= 0.5, 'warning': fraction > 0.5 && fraction <= 0.8, 'danger': fraction > 0.8 }" 
+								:style="{ width: fraction * 100 + '%'  }">
+							</div>
+						</div>
+					</div>
+				</div>
+			`,
+			props: {
+				item: { required: true, type: Object },
+				format: { type: String }
+			},
+			computed: {
+				// a computed getter
+				fraction: function () {
+					// `this` points to the vm instance
+					return this.item.used / this.item.allocated;
+				}
+			}
+		});
+
+		Vue.filter('numeric', function (value, format) {
+			// console.log(value)
+			numeral.nullFormat(' - ');
+			return numeral(value).format(format).replace('iB', '');
+		})
+
+		var app = new Vue({
+			el: '#app',
+			data: {
+				ispUsage: [],
+				diskUsage: [],
+				services: [
+					// {
+					// 	"title": "Transmission",
+					// 	"status": "stopped",
+					// 	"scheduled": true
+					// },
+					// {
+					// 	"title": "SABnzbd+",
+					// 	"status": "stopped",
+					// 	"scheduled": false
+					// },
+					// {
+					// 	"title": "Sickbeard",
+					// 	"status": "stopping",
+					// 	"scheduled": false
+					// },
+					// {
+					// 	"title": "Kodi",
+					// 	"status": "started",
+					// 	"scheduled": null
+					// },
+				]
+			},
+			computed: {
+				dailyDataUsage: function () {
+					let now = new Date();
+					var result = [{ "name": "yesterday" }, { "name": "today" }]
+
+					if (this.ispUsage) {
+						var day = this.ispUsage[now.getDate() - 2]
+						if (day) {
+							result[0] = Object.assign(day.peak, result[0]);
+						}
+						day = this.ispUsage[now.getDate() - 2]
+						if (day) {
+							result[1] = Object.assign(day.offPeak, result[1]);
+						}
+					}
+					return result
+				},
+				monthlyUsage: function () {
+					return [
+						{ "title": "peak", "allocated": 214748364800, "used": this.ispUsage.reduce((sum, day) => day.peak.up + day.peak.down + sum, 0) },
+						{ "title": "off-peak", "allocated": 1099511627776, "used": this.ispUsage.reduce((sum, day) => day.offPeak.up + day.offPeak.down + sum, 0) }
+					]
+				}
+			},
+			mounted() {
+				axios.get("/drives")
+					.then(response => {
+						this.diskUsage = response.data.drives.map(drive => {
+							drive.allocated *= 1024;
+							drive.used *= 1024;
+							return drive;
+						});
+					})
+
+				axios.get("/summary")
+					.then(response => {
+						this.ispUsage = response.data
+					})
+
+				axios.get("/services")
+					.then(response => {
+						this.services = response.data
+					})
+			}
+		})
+
+
+
+		var svg = d3.select("svg"),
+			// margin = { top: 10, right: 5, bottom: 18, left: 18 },
+			margin = { top: 12, right: 5, bottom: 0, left: 0 },
+			// width = +svg.attr("width") - margin.left - margin.right,
+			// height = +svg.attr("height") - margin.top - margin.bottom;
+			width = +parseInt(svg.style("width")) - margin.left - margin.right,
+			height = +parseInt(svg.style("height")) - margin.top - margin.bottom;
+
+		// var x = d3.scaleLinear().range([0, width / 31]),
+		var x = d3.scaleBand().range([0, width]).padding(0.1),
+			y = d3.scaleLinear().range([height, 0]);
+
+		var g = svg.append("g")
+			.attr("transform", "translate(" + margin.left + "," + margin.top + ")");
+
+		d3.tsv("data.tsv", function (d) {
+			d.frequency = +d.frequency;
+			return d;
+		}, function (error, data) {
+			if (error) throw error;
+
+			x.domain(data.map(function (d) { return d.day; }));
+			// x.domain([0, d3.max(data, function (d) { return parseInt(d.day); })]);
+			y.domain([0, d3.max(data, function (d) { return d.frequency; })]);
+
+			// g.append("g")
+			// 	.attr("class", "axis axis--x")
+			// 	.attr("transform", "translate(0," + height + ")")
+			// 	.call(
+			// 		d3.axisBottom(x)
+			// 			.tickValues(x.domain().filter(function (d, i) { return i == 0 || !((i + 1) % 5) }))
+			// 			.tickSize(0)
+			// 	);
+
+			// g.append("g")
+			// 	.attr("class", "axis axis--y")
+			// 	.call(d3.axisLeft(y).ticks(2, "%").tickSize(0))
+			// 	.append("text")
+
+			// .attr("transform", "rotate(-90)")
+			// .attr("y", 6)
+			// .attr("dy", "0.71em")
+			// .attr("text-anchor", "end")
+			// .text("Frequency");
+
+			g.selectAll(".bar")
+				.data(data)
+				.enter().append("rect")
+				.attr("class", "bar")
+				.attr("x", function (d) { return x(d.day); })
+				.attr("y", function (d) { return y(d.frequency); })
+				.attr("width", x.bandwidth())
+				.attr("height", function (d) { return height - y(d.frequency); });
+		});
+	</script>
+</body>
+
+</html>
