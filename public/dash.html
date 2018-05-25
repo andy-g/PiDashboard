@@ -309,7 +309,7 @@
 					<div onclick="alert('service')" class="label" :class="{ 'scheduled': service.scheduled, 'success': service.status == 'started', 'warning': service.status == 'starting' || service.status == 'stopping', 'danger': service.status == 'stopped' }">
 						{{ service.title }}
 						<i v-if="service.status == 'starting' || service.status == 'stopping'" class="fas fa-spinner fa-spin" style="font-weight:900"></i>
-						<i v-if="service.scheduled" class="fas fa-clock" onclick="(function(e) { e.stopPropagation(); alert('schedule'); })(event)"></i>
+						<i v-if="service.scheduled != null" class="fas fa-clock" onclick="(function(e) { e.stopPropagation(); alert('schedule'); })(event)"></i>
 					</div>
 				</div>
 				`,
