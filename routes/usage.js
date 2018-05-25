@@ -60,7 +60,8 @@ function ContentHandler(appSettings) {
     this.serviceStatus = function (req, res) {
         res.header("Access-Control-Allow-Origin", "*");
 
-        var service = appSettings.services.find(s => s.title = [req.body['service']]);
+        // var service = appSettings.services[req.body['service']];
+        var service = appSettings.services.find(s => s.title == req.body['service']);
 
         //If service isn't in config then exit 
         if (!service) {
