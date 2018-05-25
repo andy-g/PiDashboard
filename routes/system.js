@@ -61,7 +61,7 @@ module.exports = function (appSettings) {
 		services.forEach(service => {
 			var promise = new Promise(function (resolve, reject) {
 				var cmd
-				if (service.title == 'kodi')
+				if (service.title == 'Kodi')
 					cmd = 'sudo systemctl status mediacenter'
 				else
 					cmd = 'sudo service ' + service.serviceName + ' status'
