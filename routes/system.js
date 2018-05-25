@@ -17,7 +17,7 @@ module.exports = function (appSettings) {
 			}
 
 			// Mocked data
-			var stdout = 'Filesystem     1K-blocks      Used Available Use% Mounted on\n/dev/mmcblk0p2  14935048   3320444  10832884  24% /\n/dev/mmcblk0p1    244988     56741    188248  24% /boot\n/dev/sda1      961299784 870673472  41771992  96% /mnt/media'
+			// var stdout = 'Filesystem     1K-blocks      Used Available Use% Mounted on\n/dev/mmcblk0p2  14935048   3320444  10832884  24% /\n/dev/mmcblk0p1    244988     56741    188248  24% /boot\n/dev/sda1      961299784 870673472  41771992  96% /mnt/media'
 			system.formatDriveUsage(stdout, function (err, drive_usage) {
 				if (err) {
 					//res.json(500, {"err" : "Disk usage could not be retrieved."});
